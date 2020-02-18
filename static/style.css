@@ -1,0 +1,474 @@
+/**
+ * @license
+ *
+ * Copyright (C) 2015  Valtteri "tsone" Heikkila
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+@font-face {
+  font-family: "Roboto";
+  src: url('{{fonts/Roboto-Regular-webfont.woff}}');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RobotoItalic";
+  src: url('{{fonts/Roboto-Italic-webfont.woff}}');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RobotoBold";
+  src: url('{{fonts/Roboto-Bold-webfont.woff}}');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RobotoBoldItalic";
+  src: url('{{fonts/Roboto-BoldItalic-webfont.woff}}');
+  font-weight: normal;
+  font-style: normal;
+}
+
+h1, h2, h3 {
+  font-family: "RobotoBold";
+  font-weight: normal;
+  font-style: normal;
+  margin-top: 25px;
+  margin-bottom: 0px;
+  margin-left: -23px;
+}
+h4 {
+  font-family: "RobotoBold";
+  font-weight: normal;
+  font-style: normal;
+  margin-top: 5px;
+  margin-bottom: 4px;
+}
+p {
+  margin-top: 10px;
+  margin-bottom: 13px;
+}
+i {
+  font-family: "RobotoItalic";
+  font-weight: normal;
+  font-style: normal;
+}
+b {
+  font-family: "RobotoBold";
+  font-weight: normal;
+  font-style: normal;
+}
+
+html, body, input, select {
+  font-family: "Roboto";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 17px;
+  line-height: 26px;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  border: 0px none;
+  float: none;
+  color: #FCFCFC;
+  background: #0A0A0A;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.emscripten {
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+canvas.emscripten {
+  position: relative;
+  border: 0px none;
+  display: block;
+}
+
+#preload {
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}
+img.preload {
+  width: 1px;
+  height: 1px;
+}
+
+#noscript {
+  font-family: Arial,Helvetica,sans-serif;
+  font-weight: bold;
+  font-size: 17px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -50px 0 0 -140px;
+  width: 280px;
+  height: 100px;
+  text-align: center;
+}
+
+#fullscreenIcon, #soundIcon, #dpadIcon, #helpIcon,
+#controllersToggleLabel, #stackToggleLabel,
+.cart {
+  cursor: pointer;
+}
+
+
+#controllersTab {
+  position: absolute;
+  top: 0;
+  left: -292px;
+  width: 310px;
+  height: 100%;
+  transition: left 500ms;
+}
+#controllersToggleLabel {
+  position: absolute;
+  top: 50%;
+  right: 0px;
+  width: 15px;
+  height: 114px;
+  margin-top: -57px;
+  margin-right: 0px;
+  background: url('{{img/sheet.gif}}') no-repeat -16px 0;
+}
+#controllersToggle:checked + #controllersTab #controllersToggleLabel {
+  background: url('{{img/sheet.gif}}') no-repeat 0 0;
+}
+#controllersToggle:checked ~ #controllersTab {
+  left: 0px;
+}
+#controllersContainer {
+  position: absolute;
+  text-align: right;
+  bottom: 0px;
+  left: 0px;
+  width: 280px;
+  height: 100%;
+  overflow: hidden;
+}
+#controllers {
+  margin: 0;
+  padding: 0;
+  right: 0px;
+  width: 280px;
+  border: 0px none;
+}
+#controllers td {
+  margin: 0;
+  padding: 0;
+  padding-left: 2px;
+  padding-right: 2px;
+  border: 0px none;
+  text-align: right;
+}
+#controllers td + td {
+  text-align: center;
+}
+#controllers input, #controllers select {
+  margin: 0;
+  padding: 0;
+  right: 0px;
+}
+#controllers input[type=range], #controllers select  {
+  width: 132px;
+}
+
+#controllers input[type=range] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  border-radius: 0;
+  box-shadow: 0;
+  width: 132px;
+  height: 18px;
+  background: url('{{img/sheet.gif}}') no-repeat -38px -96px;
+}
+#controllers input[type=range]:focus {
+  outline: 0;
+}
+#controllers input[type=range]::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  appearance: none;
+  animate: 0.2s;
+}
+#controllers input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 12px;
+  width: 12px;
+  background: url('{{img/sheet.gif}}') no-repeat -138px -78px;
+}
+#controllers input[type=range]::-moz-range-track {
+  -moz-appearance: none;
+  appearance: none;
+  display: none;
+  animate: 0.2s;
+  background: none;
+}
+#controllers input[type=range]::-moz-range-thumb {
+  -moz-appearance: none;
+  appearance: none;
+  box-shadow: 0;
+  border: 0;
+  border-radius: 0;
+  height: 12px;
+  width: 12px;
+  background: url('{{img/sheet.gif}}') no-repeat -138px -78px;
+}
+#controllers input[type=range]::-ms-track {
+  display: none;
+  animate: 0.2s;
+}
+#controllers input[type=range]::-ms-fill-lower {
+  display: none;
+}
+#controllers input[type=range]::-ms-fill-upper {
+  display: none;
+}
+#controllers input[type=range]::-ms-thumb {
+  height: 12px;
+  width: 12px;
+  background: url('{{img/sheet.gif}}') no-repeat -138px -78px;
+}
+#controllers input[type=range]:focus::-ms-fill-lower {
+  display: none;
+}
+#controllers input[type=range]:focus::-ms-fill-upper {
+  display: none;
+}
+
+#controllers input[type=checkbox] {
+  display: none;
+  margin: 0;
+  padding: 0;
+}
+#controllers input[type=checkbox] + label {
+  display: inline-block;
+  cursor: pointer;
+  height: 18px;
+  width: 18px;
+  background: url('{{img/sheet.gif}}') no-repeat -135px -57px;
+}
+#controllers input[type=checkbox]:checked + label {
+  background: url('{{img/sheet.gif}}') no-repeat -156px -57px;
+}
+
+
+#stackTab {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 15px;
+  height: 100%;
+  transition: width 500ms;
+  overflow: hidden;
+}
+#stackToggleLabel {
+  position: absolute;
+  top: 50%;
+  left: 0px;
+  width: 15px;
+  height: 114px;
+  margin-top: -57px;
+  margin-left: 0px;
+  background: url('{{img/sheet.gif}}') no-repeat 0 0;
+}
+#stackToggle:checked + #stackTab #stackToggleLabel {
+  background: url('{{img/sheet.gif}}') no-repeat -16px 0;
+}
+#stackToggle:checked + #stackTab #stackContainer {
+  width: 416px;
+  overflow-y: scroll;
+}
+#stackToggle:checked ~ #stackTab {
+  width: 434px;
+}
+#stackContainer {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 0px;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  transition: width 500ms;
+}
+#stack {
+  display: table;
+  width: 416px;
+  height: 100%;
+  border-collapse: collapse;
+}
+
+.label {
+  font-family: "RobotoBoldItalic";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 16px;
+  position: relative;
+  text-align: center;
+  vertical-align: middle;
+  width: 171px;
+  height: 18px;
+  line-height: 18px;
+}
+.labelContainer {
+  position: relative;
+  overflow: hidden;
+  left: 63px;
+  top: 3px;
+  width: 171px;
+  height: 18px;
+  clip: rect(0px, 171px, 18px, 0px);
+}
+.cartDelete {
+  position: relative;
+  width: 21px;
+  height: 21px;
+  top: -15px;
+  left: 372px;
+  background: url('{{img/x.gif}}') no-repeat;
+}
+.cartRow {
+  display: table-row;
+  width: 396px;
+  height: 54px;
+  vertical-align: bottom;
+  background: url('{{img/cart.gif}}') no-repeat;
+}
+.cart {
+  display: table-cell;
+  width: 396px;
+  height: 54px;
+}
+
+.icon {
+  position: fixed;
+  top: 0;
+  width: 48px;
+  height: 48px;
+}
+#fullscreenIcon {
+  right: 153px;
+  background: url('{{img/sheet.gif}}') -32px 0;
+}
+#soundIcon {
+  right: 105px;
+  background: url('{{img/sheet.gif}}') -32px -48px;
+}
+#dpadIcon {
+  right: 54px;
+  background: url('{{img/sheet.gif}}') -80px 0;
+}
+#helpIcon {
+  right: 12px;
+  background: url('{{img/sheet.gif}}') -128px 0;
+  z-index: initial;
+}
+#dpadIndicator {
+  position: fixed;
+  top: 48px;
+  right: 54px;
+}
+#helpIndicator {
+  position: fixed;
+  top: 48px;
+  right: 12px;
+  z-index: 254;
+}
+
+.dimmer {
+  position: fixed;
+  opacity: 0.92;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0A0A0A;
+}
+.scrollingContainer {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+}
+.scrollingContent {
+  position: absolute;
+  width: 700px;
+  left: 50%;
+  margin-left: -350px;
+}
+
+#helpDiv {
+  display: none;
+}
+#helpToggle:checked ~ #helpIcon {
+  z-index: 254;
+}
+#helpToggle:checked ~ #helpDiv {
+  display: block;
+}
+
+#keyBindDiv {
+  display: none;
+}
+
+#catchDiv {
+  display: none;
+}
+#catch {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 120px;
+  margin-left: -300px;
+  margin-top: -60px;
+  text-align: center;
+}
+#catchName, #catchKey, #catchGamepad {
+  font-family: "RobotoBold";
+  font-weight: normal;
+  font-style: normal;
+  color: #FC0000;
+}
+
+table {
+  text-align: left;
+  border: solid #777777 0px;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+td {
+  padding: 8px;
+  border: solid #777777 1px;
+}
+a {
+  color: #FC0000;
+}
+

@@ -1,0 +1,21 @@
+{
+  "name": "em-fceux-site",
+  "private": true,
+  "version": "0.6.0",
+  "description": "Official website for em-fceux.",
+  "author": "Valtteri Heikkilä",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@bitbucket.org:tsone/em-fceux-site.git"
+  },
+  "scripts": {
+    "build": "./build-site.sh",
+    "clean": "rm -rf dist",
+    "dev:setup": "npm link ../em-fceux/npm",
+    "start": "cd dist && python -m SimpleHTTPServer"
+  },
+  "devDependencies": {
+    "em-fceux": "^0.6.0"
+  }
+}

@@ -1,0 +1,49 @@
+
+# Disable directory file index generation
+Options -Indexes
+
+ExpiresActive On
+RewriteEngine On
+
+# By default use 1 week expiration
+ExpiresDefault A604800
+Header set Cache-Control "public, max-age=604800"
+
+# If the browser accepts gzip and the requested file exists with
+# a .gz appended, then rewrite the request to the .gz file
+RewriteCond %{HTTP:Accept-Encoding} gzip
+RewriteCond %{REQUEST_FILENAME}.gz -f
+RewriteRule (.*\.(css|js|wasm))$ $1\.gz [L]
+
+# Set content type to JavaScript and encoding to gzip
+<FilesMatch ".*\.js\.gz$">
+    ForceType application/x-javascript
+    Header set Content-Encoding gzip
+</FilesMatch>
+
+# Set content type to css and encoding to gzip
+<FilesMatch ".*\.css\.gz$">
+    ForceType text/css
+    Header set Content-Encoding gzip
+</FilesMatch>
+
+# Set content type to WebAssembly and encoding to gzip
+<FilesMatch ".*\.wasm\.gz$">
+    ForceType application/wasm
+    Header set Content-Encoding gzip
+</FilesMatch>
+
+# index.html uses 5 minute expiration
+<FilesMatch "index\.html$">
+    ExpiresDefault A300
+    Header set Cache-Control "public, max-age=300"
+</FilesMatch>
+
+# Cache based on both browser type and encoding
+Header append Vary "User-Agent, Accept-Encoding"
+
+# Disable ETags
+FileETag none
+
+# Disable framing
+Header always append X-Frame-Options DENY
