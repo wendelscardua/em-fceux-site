@@ -18,32 +18,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 @font-face {
-  font-family: "Roboto";
-  src: url('{{fonts/Roboto-Regular-webfont.woff}}');
+  font-family: 'Roboto';
+  src: url('fonts/Roboto-Regular-webfont.woff');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
-  font-family: "RobotoItalic";
-  src: url('{{fonts/Roboto-Italic-webfont.woff}}');
+  font-family: 'RobotoItalic';
+  src: url('fonts/Roboto-Italic-webfont.woff');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
-  font-family: "RobotoBold";
-  src: url('{{fonts/Roboto-Bold-webfont.woff}}');
+  font-family: 'RobotoBold';
+  src: url('fonts/Roboto-Bold-webfont.woff');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
-  font-family: "RobotoBoldItalic";
-  src: url('{{fonts/Roboto-BoldItalic-webfont.woff}}');
+  font-family: 'RobotoBoldItalic';
+  src: url('fonts/Roboto-BoldItalic-webfont.woff');
   font-weight: normal;
   font-style: normal;
 }
 
-h1, h2, h3 {
-  font-family: "RobotoBold";
+h1,
+h2,
+h3 {
+  font-family: 'RobotoBold';
   font-weight: normal;
   font-style: normal;
   margin-top: 25px;
@@ -51,7 +53,7 @@ h1, h2, h3 {
   margin-left: -23px;
 }
 h4 {
-  font-family: "RobotoBold";
+  font-family: 'RobotoBold';
   font-weight: normal;
   font-style: normal;
   margin-top: 5px;
@@ -62,30 +64,34 @@ p {
   margin-bottom: 13px;
 }
 i {
-  font-family: "RobotoItalic";
+  font-family: 'RobotoItalic';
   font-weight: normal;
   font-style: normal;
 }
 b {
-  font-family: "RobotoBold";
+  font-family: 'RobotoBold';
   font-weight: normal;
   font-style: normal;
 }
 
-html, body, input, select {
-  font-family: "Roboto";
+html,
+body,
+input,
+select {
+  font-family: 'Roboto';
   font-weight: normal;
   font-style: normal;
   font-size: 17px;
   line-height: 26px;
 }
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   border: 0px none;
   float: none;
-  color: #FCFCFC;
-  background: #0A0A0A;
+  color: #fcfcfc;
+  background: #0a0a0a;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -114,7 +120,7 @@ img.preload {
 }
 
 #noscript {
-  font-family: Arial,Helvetica,sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-weight: bold;
   font-size: 17px;
   position: absolute;
@@ -126,12 +132,15 @@ img.preload {
   text-align: center;
 }
 
-#fullscreenIcon, #soundIcon, #dpadIcon, #helpIcon,
-#controllersToggleLabel, #stackToggleLabel,
+#fullscreenIcon,
+#soundIcon,
+#dpadIcon,
+#helpIcon,
+#controllersToggleLabel,
+#stackToggleLabel,
 .cart {
   cursor: pointer;
 }
-
 
 #controllersTab {
   position: absolute;
@@ -149,10 +158,10 @@ img.preload {
   height: 114px;
   margin-top: -57px;
   margin-right: 0px;
-  background: url('{{img/sheet.gif}}') no-repeat -16px 0;
+  background: url('img/sheet.gif') no-repeat -16px 0;
 }
 #controllersToggle:checked + #controllersTab #controllersToggleLabel {
-  background: url('{{img/sheet.gif}}') no-repeat 0 0;
+  background: url('img/sheet.gif') no-repeat 0 0;
 }
 #controllersToggle:checked ~ #controllersTab {
   left: 0px;
@@ -184,16 +193,18 @@ img.preload {
 #controllers td + td {
   text-align: center;
 }
-#controllers input, #controllers select {
+#controllers input,
+#controllers select {
   margin: 0;
   padding: 0;
   right: 0px;
 }
-#controllers input[type=range], #controllers select  {
+#controllers input[type='range'],
+#controllers select {
   width: 132px;
 }
 
-#controllers input[type=range] {
+#controllers input[type='range'] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -205,31 +216,31 @@ img.preload {
   box-shadow: 0;
   width: 132px;
   height: 18px;
-  background: url('{{img/sheet.gif}}') no-repeat -38px -96px;
+  background: url('img/sheet.gif') no-repeat -38px -96px;
 }
-#controllers input[type=range]:focus {
+#controllers input[type='range']:focus {
   outline: 0;
 }
-#controllers input[type=range]::-webkit-slider-runnable-track {
+#controllers input[type='range']::-webkit-slider-runnable-track {
   -webkit-appearance: none;
   appearance: none;
   animate: 0.2s;
 }
-#controllers input[type=range]::-webkit-slider-thumb {
+#controllers input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   height: 12px;
   width: 12px;
-  background: url('{{img/sheet.gif}}') no-repeat -138px -78px;
+  background: url('img/sheet.gif') no-repeat -138px -78px;
 }
-#controllers input[type=range]::-moz-range-track {
+#controllers input[type='range']::-moz-range-track {
   -moz-appearance: none;
   appearance: none;
   display: none;
   animate: 0.2s;
   background: none;
 }
-#controllers input[type=range]::-moz-range-thumb {
+#controllers input[type='range']::-moz-range-thumb {
   -moz-appearance: none;
   appearance: none;
   box-shadow: 0;
@@ -237,46 +248,45 @@ img.preload {
   border-radius: 0;
   height: 12px;
   width: 12px;
-  background: url('{{img/sheet.gif}}') no-repeat -138px -78px;
+  background: url('img/sheet.gif') no-repeat -138px -78px;
 }
-#controllers input[type=range]::-ms-track {
+#controllers input[type='range']::-ms-track {
   display: none;
   animate: 0.2s;
 }
-#controllers input[type=range]::-ms-fill-lower {
+#controllers input[type='range']::-ms-fill-lower {
   display: none;
 }
-#controllers input[type=range]::-ms-fill-upper {
+#controllers input[type='range']::-ms-fill-upper {
   display: none;
 }
-#controllers input[type=range]::-ms-thumb {
+#controllers input[type='range']::-ms-thumb {
   height: 12px;
   width: 12px;
-  background: url('{{img/sheet.gif}}') no-repeat -138px -78px;
+  background: url('img/sheet.gif') no-repeat -138px -78px;
 }
-#controllers input[type=range]:focus::-ms-fill-lower {
+#controllers input[type='range']:focus::-ms-fill-lower {
   display: none;
 }
-#controllers input[type=range]:focus::-ms-fill-upper {
+#controllers input[type='range']:focus::-ms-fill-upper {
   display: none;
 }
 
-#controllers input[type=checkbox] {
+#controllers input[type='checkbox'] {
   display: none;
   margin: 0;
   padding: 0;
 }
-#controllers input[type=checkbox] + label {
+#controllers input[type='checkbox'] + label {
   display: inline-block;
   cursor: pointer;
   height: 18px;
   width: 18px;
-  background: url('{{img/sheet.gif}}') no-repeat -135px -57px;
+  background: url('img/sheet.gif') no-repeat -135px -57px;
 }
-#controllers input[type=checkbox]:checked + label {
-  background: url('{{img/sheet.gif}}') no-repeat -156px -57px;
+#controllers input[type='checkbox']:checked + label {
+  background: url('img/sheet.gif') no-repeat -156px -57px;
 }
-
 
 #stackTab {
   position: absolute;
@@ -295,10 +305,10 @@ img.preload {
   height: 114px;
   margin-top: -57px;
   margin-left: 0px;
-  background: url('{{img/sheet.gif}}') no-repeat 0 0;
+  background: url('img/sheet.gif') no-repeat 0 0;
 }
 #stackToggle:checked + #stackTab #stackToggleLabel {
-  background: url('{{img/sheet.gif}}') no-repeat -16px 0;
+  background: url('img/sheet.gif') no-repeat -16px 0;
 }
 #stackToggle:checked + #stackTab #stackContainer {
   width: 416px;
@@ -325,7 +335,7 @@ img.preload {
 }
 
 .label {
-  font-family: "RobotoBoldItalic";
+  font-family: 'RobotoBoldItalic';
   font-weight: normal;
   font-style: normal;
   font-size: 16px;
@@ -351,14 +361,14 @@ img.preload {
   height: 21px;
   top: -15px;
   left: 372px;
-  background: url('{{img/x.gif}}') no-repeat;
+  background: url('img/x.gif') no-repeat;
 }
 .cartRow {
   display: table-row;
   width: 396px;
   height: 54px;
   vertical-align: bottom;
-  background: url('{{img/cart.gif}}') no-repeat;
+  background: url('img/cart.gif') no-repeat;
 }
 .cart {
   display: table-cell;
@@ -374,19 +384,19 @@ img.preload {
 }
 #fullscreenIcon {
   right: 153px;
-  background: url('{{img/sheet.gif}}') -32px 0;
+  background: url('img/sheet.gif') -32px 0;
 }
 #soundIcon {
   right: 105px;
-  background: url('{{img/sheet.gif}}') -32px -48px;
+  background: url('img/sheet.gif') -32px -48px;
 }
 #dpadIcon {
   right: 54px;
-  background: url('{{img/sheet.gif}}') -80px 0;
+  background: url('img/sheet.gif') -80px 0;
 }
 #helpIcon {
   right: 12px;
-  background: url('{{img/sheet.gif}}') -128px 0;
+  background: url('img/sheet.gif') -128px 0;
   z-index: initial;
 }
 #dpadIndicator {
@@ -408,7 +418,7 @@ img.preload {
   left: 0;
   width: 100%;
   height: 100%;
-  background: #0A0A0A;
+  background: #0a0a0a;
 }
 .scrollingContainer {
   position: absolute;
@@ -451,11 +461,13 @@ img.preload {
   margin-top: -60px;
   text-align: center;
 }
-#catchName, #catchKey, #catchGamepad {
-  font-family: "RobotoBold";
+#catchName,
+#catchKey,
+#catchGamepad {
+  font-family: 'RobotoBold';
   font-weight: normal;
   font-style: normal;
-  color: #FC0000;
+  color: #fc0000;
 }
 
 table {
@@ -469,6 +481,5 @@ td {
   border: solid #777777 1px;
 }
 a {
-  color: #FC0000;
+  color: #fc0000;
 }
-
