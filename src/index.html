@@ -115,18 +115,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
     <h3>INPUT BINDINGS</h3>
     <table hidden>
-      <tr id="keyBindProto"><td><td><td><td data-id="" data-name=""><input type="button" value="Set" onclick="app._inputDialog.catchStart(this.parentNode);" /> <input type="button" value="Clear" onclick="app.clearBinding(this.parentNode);" />
+      <tr id="keyBindProto"><td><td><td><td data-id="" data-name=""><input type="button" value="Set" onclick="app._inputDialog.catchStart(this.parentNode);" /> <input type="button" value="Clear" onclick="app._inputDialog.clearBinding(this.parentNode);" />
     </table>
 
     <p>Click 'Set' button to change bindings for an input. Click 'Clear' to remove the binding.
     <p><table id="keyBindTable"><tr><td><b>Input</b><td><b>Keyboard</b><td><b>Gamepad</b><td><b>Options</b></table>
     <br/>
-    <input type="button" value="Reset to Defaults" onclick="app.resetDefaultBindings();" />
+    <input type="button" value="Reset to Defaults" onclick="app._inputDialog.resetToDefaults();" />
     <br/><br/>
   </div>
   </div>
 </div>
-<div class="icon" id="dpadIcon" onclick="app._inputDialog.keyBindToggle()"></div>
+<div class="icon" id="dpadIcon" onclick="app._inputDialog.toggleShow()"></div>
 
 <div id="catchDiv">
   <div class="dimmer"></div>
@@ -167,7 +167,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <tr><td>B Button (Controller 1)<td>D
       <tr><td>Select (Controller 1)<td>S
       <tr><td>Start (Controller 1)<td>Enter
-      <tr><td>Reset System<td>Ctrl-R
+      <tr><td>Reset System<td>Ctrl+R
       <tr><td>Exit Full-screen Mode<td>Esc
       <tr><td>Speed Throttle<td>Tab
       <tr><td>Select Save State<td>0-9
@@ -193,7 +193,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
     <h3>NOTES</h3>
     <p>Games and save data are stored locally in the web browser and are never transmitted out of the browser.
-    Extracting the games and save data from the browser (for backups etc.) is not supported.
     <p>Please refer to <a href="https://bitbucket.org/tsone/em-fceux/">em-fceux repository</a> for more technical information.
     <p>em-fceux and FCEUX are licensed under <a href="gpl-2.0.txt">GNU GPL Version 2</a>.
     <p>Version: 0.6.0

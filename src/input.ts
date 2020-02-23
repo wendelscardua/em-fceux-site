@@ -20,13 +20,14 @@
 
 import { FceuxModule } from 'em-fceux';
 
-type InputSpec = [string, string, string[]];
-
+// Key: { id: [keys, gamepad] }
 interface InputMap {
-  [input: string]: string[];
+  [input: string]: [string[], number];
 }
 
 export class Input {
+  private static _defaultInputSpec = Input.defaultInputSpec();
+
   private _canvas: HTMLCanvasElement;
   private _fceux: FceuxModule;
   private _keyHandler = this.handleKey.bind(this);
@@ -34,67 +35,41 @@ export class Input {
   private _inputState = new Set<string>();
   private _prevInputState = new Set<string>();
   private _turboFrame = false;
-  private _keySet = new Set<string>();
-  private _inputSpec: InputSpec[];
-  private _inputMap: InputMap;
+  _keySet = new Set<string>();
+  _inputMap: InputMap = {};
+  private _listenerOptions = { capture: true };
 
   constructor(canvas: HTMLCanvasElement, fceux: FceuxModule) {
     this._canvas = canvas;
     this._fceux = fceux;
 
-    window.addEventListener('keyup', this._keyHandler);
-    window.addEventListener('keydown', this._keyHandler);
-    this._canvas.addEventListener('mousedown', this._mouseHandler);
+    this.loadOrResetInputMap(false);
 
-    // Input specification: [ id, name, defaultKeys ].
-    this._inputSpec = [
-      // System inputs.
-      ['reset', 'Reset', ['KeyR', 'ControlLeft']],
-      ['throttle', 'Throttle', ['Tab']],
-      ['pause', 'Pause', ['KeyP']],
-      ['advanceFrame', 'Advance Single Frame', ['Slash']],
-      ['stateSave', 'Save State', ['F5']],
-      ['stateLoad', 'Load State', ['F7']],
-      ['state0', 'Select State 0', ['Digit0']],
-      ['state1', 'Select State 1', ['Digit1']],
-      ['state2', 'Select State 2', ['Digit2']],
-      ['state3', 'Select State 3', ['Digit3']],
-      ['state4', 'Select State 4', ['Digit4']],
-      ['state5', 'Select State 5', ['Digit5']],
-      ['state6', 'Select State 6', ['Digit6']],
-      ['state7', 'Select State 7', ['Digit7']],
-      ['state8', 'Select State 8', ['Digit8']],
-      ['state9', 'Select State 9', ['Digit9']],
-      // Controller 1-4 inputs generated below...
-    ];
-    const controllerInputTemplate: InputSpec[] = [
-      ['a', 'A', ['KeyF']],
-      ['b', 'B', ['KeyD']],
-      ['select', 'Select', ['KeyS']],
-      ['start', 'Start', ['Enter']],
-      ['up', 'Up', ['ArrowUp']],
-      ['down', 'Down', ['ArrowDown']],
-      ['left', 'Left', ['ArrowLeft']],
-      ['right', 'Right', ['ArrowRight']],
-      ['turbo-a', 'Turbo A', ['KeyH']],
-      ['turbo-b', 'Turbo B', ['KeyG']],
-    ];
-    for (let index of ['1', '2', '3', '4']) {
-      const idPrefix = 'controller-' + index + '-';
-      const nameSuffix = ' (Controller ' + index + ')';
-      for (let input of controllerInputTemplate) {
-        const keys = index != '1' ? [] : input[2];
-        this._inputSpec.push([idPrefix + input[0], input[1] + nameSuffix, keys]);
-      }
+    window.addEventListener('keyup', this._keyHandler, this._listenerOptions);
+    window.addEventListener('keydown', this._keyHandler, this._listenerOptions);
+    this._canvas.addEventListener('mousedown', this._mouseHandler, this._listenerOptions);
+  }
+
+  loadOrResetInputMap(forceReset: boolean) {
+    const inputMap = localStorage['input-map'];
+    if (forceReset || inputMap === undefined) {
+      this._inputMap = Input.defaultInputMap();
+      this.saveInputMap();
+    } else {
+      this._inputMap = JSON.parse(inputMap);
     }
+  }
 
-    this._inputMap = this.defaultInputMap();
+  saveInputMap() {
+    localStorage['input-map'] = JSON.stringify(this._inputMap);
   }
 
   dispose() {
-    this._canvas.removeEventListener('mousedown', this._mouseHandler);
-    window.removeEventListener('keydown', this._keyHandler);
-    window.removeEventListener('keyup', this._keyHandler);
+    this.saveInputMap();
+
+    this._canvas.removeEventListener('mousedown', this._mouseHandler, this._listenerOptions);
+    window.removeEventListener('keydown', this._keyHandler, this._listenerOptions);
+    window.removeEventListener('keyup', this._keyHandler, this._listenerOptions);
   }
 
   update() {
@@ -105,17 +80,11 @@ export class Input {
     this._inputState = tmp;
     this._inputState.clear();
 
-    for (let input in this._inputMap) {
-      const keys = this._inputMap[input];
-      let inputActive = keys.length > 0;
-      for (let key of keys) {
-        if (!this._keySet.has(key)) {
-          inputActive = false;
-          break;
-        }
-      }
-      if (inputActive) {
-        this._inputState.add(input);
+    const gamepads = navigator && navigator.getGamepads ? navigator.getGamepads() : [];
+    for (let id in this._inputMap) {
+      const input = this._inputMap[id];
+      if (this.isInputKeysActive(input[0]) || this.isInputGamepadActive(gamepads, input[1])) {
+        this._inputState.add(id);
       }
     }
 
@@ -123,10 +92,105 @@ export class Input {
     this.updateControllers();
   }
 
-  defaultInputMap() {
+  setInput(id: string, keys: string[], gamepad: number) {
+    this._inputMap[id] = [keys, gamepad];
+    this.saveInputMap();
+  }
+
+  static idToName(id: string) {
+    return Input._defaultInputSpec[id][0];
+  }
+
+  private isInputKeysActive(keys: string[]) {
+    if (keys.length > 0) {
+      for (let key of keys) {
+        if (!this._keySet.has(key)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
+  private isInputGamepadActive(gamepads: (Gamepad | null)[], binding: number) {
+    const type = binding & 0x03; // 0: not set, 1: button, 2: axis (negative), 3: axis (positive)
+    if (type && gamepads) {
+      const gamepadIdx = (binding & 0x0c) >> 2; // 0-3: gamepad index
+      if (gamepadIdx < gamepads.length) {
+        const p = gamepads[gamepadIdx];
+        if (p && p.connected) {
+          const idx = (binding & 0xf0) >> 4; // 0-15: button index
+          switch (type) {
+            case 1:
+              return idx < p.buttons.length && (p.buttons[idx].pressed || p.buttons[idx].value >= 0.1);
+            case 2:
+              return idx < p.axes.length && p.axes[idx] <= -0.1;
+            case 3:
+              return idx < p.axes.length && p.axes[idx] >= 0.1;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  private static defaultInputSpec() {
+    // Key: { id: [name, defaultKeys, defaultGamepad] }
+    // Gamepad bitfield bits:
+    //   0-1: Type of binding: 0=not set, 1=button, 2=axis (negative), 3=axis (positive).
+    //   2-3: Gamepad index (0-3).
+    //   4-7: Button/axis index (0-15).
+    const spec = {
+      // System inputs.
+      reset: ['Reset', ['KeyR', 'ControlLeft'], 0],
+      throttle: ['Throttle', ['Tab'], 0],
+      pause: ['Pause', ['KeyP'], 0],
+      advanceFrame: ['Advance Single Frame', ['Slash'], 0],
+      stateSave: ['Save State', ['F5'], 0],
+      stateLoad: ['Load State', ['F7'], 0],
+      state0: ['Select State 0', ['Digit0'], 0],
+      state1: ['Select State 1', ['Digit1'], 0],
+      state2: ['Select State 2', ['Digit2'], 0],
+      state3: ['Select State 3', ['Digit3'], 0],
+      state4: ['Select State 4', ['Digit4'], 0],
+      state5: ['Select State 5', ['Digit5'], 0],
+      state6: ['Select State 6', ['Digit6'], 0],
+      state7: ['Select State 7', ['Digit7'], 0],
+      state8: ['Select State 8', ['Digit8'], 0],
+      state9: ['Select State 9', ['Digit9'], 0],
+      // Controller 1-4 inputs generated below...
+    };
+    const controllerInputTemplate = {
+      A: ['A', ['KeyF'], 1],
+      B: ['B', ['KeyD'], 17],
+      Select: ['Select', ['KeyS'], 161],
+      Start: ['Start', ['Enter'], 177],
+      Up: ['Up', ['ArrowUp'], 18],
+      Down: ['Down', ['ArrowDown'], 19],
+      Left: ['Left', ['ArrowLeft'], 2],
+      Right: ['Right', ['ArrowRight'], 3],
+      TurboA: ['Turbo A', ['KeyH'], 49],
+      TurboB: ['Turbo B', ['KeyG'], 65],
+    };
+    for (let i of ['1', '2', '3', '4']) {
+      const idPrefix = 'controller' + i;
+      const nameSuffix = ' (Controller ' + i + ')';
+      for (let id in controllerInputTemplate) {
+        const t = controllerInputTemplate[id];
+        const keys = i != '1' ? [] : t[1];
+        const gamepad = i != '1' ? 0 : t[2];
+        spec[idPrefix + id] = [t[0] + nameSuffix, keys, gamepad];
+      }
+    }
+    return spec;
+  }
+
+  private static defaultInputMap() {
     const result: InputMap = {};
-    for (let input of this._inputSpec) {
-      result[input[0]] = input[2];
+    for (let id in Input._defaultInputSpec) {
+      const t = Input._defaultInputSpec[id];
+      result[id] = [t[1], t[2]];
     }
     return result;
   }
@@ -166,19 +230,19 @@ export class Input {
   private bitsForController(index: '1' | '2' | '3' | '4') {
     let q = 0;
 
-    const prefix = 'controller-' + index + '-';
-    if (this.inputDown(prefix + 'a')) q |= 0x01;
-    if (this.inputDown(prefix + 'b')) q |= 0x02;
-    if (this.inputDown(prefix + 'select')) q |= 0x04;
-    if (this.inputDown(prefix + 'start')) q |= 0x08;
-    if (this.inputDown(prefix + 'up')) q |= 0x10;
-    if (this.inputDown(prefix + 'down')) q |= 0x20;
-    if (this.inputDown(prefix + 'left')) q |= 0x40;
-    if (this.inputDown(prefix + 'right')) q |= 0x80;
+    const prefix = 'controller' + index;
+    if (this.inputDown(prefix + 'A')) q |= 0x01;
+    if (this.inputDown(prefix + 'B')) q |= 0x02;
+    if (this.inputDown(prefix + 'Select')) q |= 0x04;
+    if (this.inputDown(prefix + 'Start')) q |= 0x08;
+    if (this.inputDown(prefix + 'Up')) q |= 0x10;
+    if (this.inputDown(prefix + 'Down')) q |= 0x20;
+    if (this.inputDown(prefix + 'Left')) q |= 0x40;
+    if (this.inputDown(prefix + 'Right')) q |= 0x80;
 
     if (this._turboFrame) {
-      if (this.inputDown(prefix + 'turbo-a')) q |= 0x01;
-      if (this.inputDown(prefix + 'turbo-b')) q |= 0x02;
+      if (this.inputDown(prefix + 'TurboA')) q |= 0x01;
+      if (this.inputDown(prefix + 'TurboB')) q |= 0x02;
     }
 
     if ((q & 0x30) == 0x30) q &= ~0x20; // Replace up + down -> up.
@@ -195,18 +259,23 @@ export class Input {
     return !this._prevInputState.has(input) && this._inputState.has(input);
   }
 
-  private handleKey(e: KeyboardEvent) {
-    if (e.type == 'keydown') {
-      this._keySet.add(e.code);
+  private handleKey(ev: KeyboardEvent) {
+    if (!ev.metaKey && !ev.altKey) {
+      if (ev.type == 'keydown') {
+        this._keySet.add(ev.code);
+      } else {
+        this._keySet.delete(ev.code);
+      }
+      ev.preventDefault();
     } else {
-      this._keySet.delete(e.code);
+      // Workaround for some events not sent when Meta or Alt is pressed.
+      this._keySet.clear();
     }
-    e.preventDefault();
   }
 
-  private handleMouse(e: MouseEvent) {
+  private handleMouse(ev: MouseEvent) {
     const rect = this._canvas.getBoundingClientRect();
-    this._fceux.triggerZapper(e.clientX - rect.left, e.clientY - rect.top);
-    e.preventDefault();
+    this._fceux.triggerZapper(ev.clientX - rect.left, ev.clientY - rect.top);
+    ev.preventDefault();
   }
 }

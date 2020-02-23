@@ -18,129 +18,123 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { App } from './app';
+import { Elements } from './app';
+import { Input } from './input';
 
 export class InputDialog {
-  private _app: App;
+  private _el: Elements;
+  private _input: Input;
   private _catchId = '';
-  _catchEnabled = false;
-  _catchKey = 0;
-  _catchGamepad = 0;
+  private _catchKeys: string[] = [];
+  private _catchGamepad = 0;
 
-  constructor(app: App) {
-    this._app = app;
+  private _keyDownListener = this.handleKeyDown.bind(this);
+  private _gamepadInterval = 0;
+  private _listenerOptions = { capture: false, passive: true };
 
-    document.addEventListener('keydown', e => {
-      if (!this._catchEnabled) {
-        return;
+  constructor(el: Elements, input: Input) {
+    this._el = el;
+    this._input = input;
+    this.reset();
+  }
+
+  private handleKeyDown() {
+    const keys = Array.from(this._input._keySet);
+    this._el.catchKey.innerHTML = InputDialog.formatKeys(keys);
+    this._catchKeys = keys;
+  }
+
+  dispose() {
+    this.removeListeners();
+  }
+
+  toggleShow() {
+    this._el.keyBindDiv.style.display = this._el.keyBindDiv.style.display == 'block' ? 'none' : 'block';
+  }
+
+  clearBinding(el: HTMLTableDataCellElement) {
+    const id = <string>el.dataset.id;
+    this._input.setInput(id, [], 0);
+    this.reset();
+  }
+
+  resetToDefaults() {
+    this._input.loadOrResetInputMap(true);
+    this.reset();
+  }
+
+  catchStart(el: HTMLTableDataCellElement) {
+    const id = <string>el.dataset.id;
+    this._catchId = id;
+
+    this._el.catchName.innerHTML = <string>el.dataset.name;
+
+    const input = this._input._inputMap[id];
+    this._catchKeys = input[0];
+    this._el.catchKey.innerHTML = InputDialog.formatKeys(input[0]);
+    this._catchGamepad = input[1];
+    this._el.catchGamepad.innerHTML = InputDialog.formatGamepad(input[1]);
+
+    this._el.catchDiv.style.display = 'block';
+
+    this.addListeners();
+  }
+
+  catchEnd(save: boolean) {
+    if (save && this._catchId) {
+      // Check for duplicate bindings.
+      for (let id in this._input._inputMap) {
+        if (id == this._catchId) {
+          // Skip current.
+          continue;
+        }
+
+        const input = this._input._inputMap[id];
+        if (input[0] && this._catchKeys == input[0]) {
+          // Duplicate keys.
+          if (!confirm('Key ' + InputDialog.formatKeys(input[0]) + ' already bound to ' + id + '. Clear the previous binding?')) {
+            return;
+          }
+          this._input.setInput(id, [], input[1]);
+        }
+        if (input[1] && this._catchGamepad == input[1]) {
+          // Duplicate gamepad.
+          if (!confirm(InputDialog.formatGamepad(input[1]) + ' already bound to ' + id + '. Clear the previous binding?')) {
+            return;
+          }
+          this._input.setInput(id, input[0], 0);
+        }
       }
-      let key = e.keyCode & 0x0ff;
-      if (e.metaKey) key |= 0x800;
-      if (e.altKey) key |= 0x400;
-      if (e.shiftKey) key |= 0x200;
-      if (e.ctrlKey) key |= 0x100;
 
-      this._app._el.catchKey.innerHTML = app.key2Name(key);
-      this._catchKey = key;
-    });
+      this._input.setInput(this._catchId, this._catchKeys, this._catchGamepad);
+      this._catchId = '';
+      this.reset();
+    }
+
+    this.removeListeners();
+    this._el.catchDiv.style.display = 'none';
+  }
+
+  private addListeners() {
+    document.addEventListener('keydown', this._keyDownListener, this._listenerOptions);
 
     // Must scan/poll as Gamepad API doesn't send input events...
-    setInterval(() => {
-      if (!this._catchEnabled) {
-        return;
-      }
+    this._gamepadInterval = window.setInterval(() => {
       const binding = this.scanForGamepadBinding();
       if (!binding) {
         return;
       }
-      this._app._el.catchGamepad.innerHTML = app.gamepad2Name(binding);
+      this._el.catchGamepad.innerHTML = InputDialog.formatGamepad(binding);
       this._catchGamepad = binding;
     }, 60);
   }
 
-  keyBindToggle() {
-    this._app._el.keyBindDiv.style.display = this._app._el.keyBindDiv.style.display == 'block' ? 'none' : 'block';
+  private removeListeners() {
+    clearInterval(this._gamepadInterval);
+    document.removeEventListener('keydown', this._keyDownListener, this._listenerOptions);
   }
 
-  catchStart(keyBind) {
-    const nameEl = this._app._el.catchName;
-    const keyEl = this._app._el.catchKey;
-    const gamepadEl = this._app._el.catchGamepad;
-    const catchDivEl = this._app._el.catchDiv;
-
-    const id = keyBind.dataset.id;
-    this._catchId = id;
-
-    nameEl.innerHTML = keyBind.dataset.name;
-    const key = this._app.getLocalKey(id);
-    this._catchKey = key;
-    keyEl.innerHTML = this._app.key2Name(key);
-
-    const binding = this._app.getLocalGamepad(id);
-    this._catchGamepad = binding;
-    gamepadEl.innerHTML = this._app.gamepad2Name(binding);
-
-    catchDivEl.style.display = 'block';
-
-    this._catchEnabled = true;
-  }
-
-  catchEnd(save: boolean) {
-    const catchDivEl = this._app._el.catchDiv;
-
-    this._catchEnabled = false;
-
-    if (save && this._catchId) {
-      // Check/overwrite duplicates
-      /*
-		  for (let id in FCEC.inputs) {
-
-        // Skip current binding
-		    if (FCEV.catchId == id) {
-          continue;
-        }
-
-                    // Check duplicate key binding
-		    const key = FCEM.getLocalKey(id);
-		    if (key && FCEV.catchKey == key) {
-		      if (!confirm('Key ' + FCEM.key2Name(key) + ' already bound as ' + FCEC.inputs[id][2] + '. Clear the previous binding?')) {
-		        FCEV.catchEnabled = true; // Re-enable key catching
-		        return;
-		      }
-		      FCEM.setLocalKey(id, 0);
-		      // fceux.bindKey(0, key);
-		    }
-
-        // Check duplicate gamepad binding
-		    const binding = FCEM.getLocalGamepad(id);
-		    if (binding && FCEV.catchGamepad == binding) {
-		      if (!confirm(FCEM.gamepad2Name(binding) + ' already bound as ' + FCEC.inputs[id][2] + '. Clear the previous binding?')) {
-		        FCEV.catchEnabled = true; // Re-enable key catching
-		        return;
-		      }
-		      FCEM.setLocalGamepad(id, 0);
-		      // fceux.bindGamepad(id, 0);
-		    }
-      }
-      */
-
-      // Clear old key binding
-      // const oldKey = this._app.getLocalKey(this._catchId);
-      // fceux.bindKey(0, oldKey);
-      // Set new bindings
-      this._app.setLocalKey(this._catchId, this._catchKey);
-      // fceux.bindKey(FCEV.catchId, FCEV.catchKey);
-      this._app.setLocalGamepad(this._catchId, this._catchGamepad);
-      // fceux.bindGamepad(FCEV.catchId, FCEV.catchGamepad);
-
-      this._catchId = '';
-      this._app.initKeyBind();
-    }
-
-    catchDivEl.style.display = 'none';
-  }
-
-  scanForGamepadBinding() {
+  private scanForGamepadBinding() {
     if (navigator && navigator.getGamepads) {
       const gamepads = navigator.getGamepads();
       // Scan through gamepads.
@@ -173,5 +167,49 @@ export class InputDialog {
       }
     }
     return 0;
+  }
+
+  private static fixKey(s: string) {
+    for (let prefix of ['Key', 'Digit', 'Arrow']) {
+      if (s.startsWith(prefix)) {
+        return s.slice(prefix.length);
+      }
+    }
+    return s;
+  }
+
+  private static formatKeys(keys: string[]) {
+    keys = keys.map(s => InputDialog.fixKey(s));
+    return keys && keys.length > 0 ? keys.join('+') : '(Unset)';
+  }
+
+  private static formatGamepad(gamepad: number) {
+    const type = gamepad & 0x03;
+    const pad = (gamepad & 0x0c) >> 2;
+    const idx = (gamepad & 0xf0) >> 4;
+    if (!type) return '(Unset)';
+    const typeNames = ['Button', '-Axis', '+Axis'];
+    return 'Gamepad ' + pad + ' ' + typeNames[type - 1] + ' ' + idx;
+  }
+
+  private reset() {
+    const table = this._el.keyBindTable;
+
+    while (table.lastChild != table.firstChild) {
+      table.removeChild(<Node>table.lastChild);
+    }
+
+    for (let id in this._input._inputMap) {
+      const input = this._input._inputMap[id];
+      const name = Input.idToName(id);
+      const el = <HTMLTableRowElement>this._el.keyBindProto.cloneNode(true);
+      el.children[0].innerHTML = name;
+      el.children[1].innerHTML = InputDialog.formatKeys(input[0]);
+      el.children[2].innerHTML = InputDialog.formatGamepad(input[1]);
+      el.children[3]['dataset'].id = id;
+      el.children[3]['dataset'].name = name;
+
+      table.appendChild(el);
+    }
   }
 }

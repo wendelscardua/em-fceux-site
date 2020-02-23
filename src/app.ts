@@ -22,110 +22,6 @@ import FCEUX, { FceuxModule } from 'em-fceux';
 import { Input } from './input';
 import { InputDialog } from './input-dialog';
 
-// NOTE: Originally from: http://jsfiddle.net/vWx8V/
-const KEY_CODE_TO_NAME = {
-  8: 'Backspace',
-  9: 'Tab',
-  13: 'Return',
-  16: 'Shift',
-  17: 'Ctrl',
-  18: 'Alt',
-  19: 'Pause/Break',
-  20: 'Caps Lock',
-  27: 'Esc',
-  32: 'Space',
-  33: 'Page Up',
-  34: 'Page Down',
-  35: 'End',
-  36: 'Home',
-  37: 'Left',
-  38: 'Up',
-  39: 'Right',
-  40: 'Down',
-  45: 'Insert',
-  46: 'Delete',
-  48: '0',
-  49: '1',
-  50: '2',
-  51: '3',
-  52: '4',
-  53: '5',
-  54: '6',
-  55: '7',
-  56: '8',
-  57: '9',
-  65: 'A',
-  66: 'B',
-  67: 'C',
-  68: 'D',
-  69: 'E',
-  70: 'F',
-  71: 'G',
-  72: 'H',
-  73: 'I',
-  74: 'J',
-  75: 'K',
-  76: 'L',
-  77: 'M',
-  78: 'N',
-  79: 'O',
-  80: 'P',
-  81: 'Q',
-  82: 'R',
-  83: 'S',
-  84: 'T',
-  85: 'U',
-  86: 'V',
-  87: 'W',
-  88: 'X',
-  89: 'Y',
-  90: 'Z',
-  91: 'Meta',
-  93: 'Right Click',
-  96: 'Numpad 0',
-  97: 'Numpad 1',
-  98: 'Numpad 2',
-  99: 'Numpad 3',
-  100: 'Numpad 4',
-  101: 'Numpad 5',
-  102: 'Numpad 6',
-  103: 'Numpad 7',
-  104: 'Numpad 8',
-  105: 'Numpad 9',
-  106: 'Numpad *',
-  107: 'Numpad +',
-  109: 'Numpad -',
-  110: 'Numpad .',
-  111: 'Numpad /',
-  112: 'F1',
-  113: 'F2',
-  114: 'F3',
-  115: 'F4',
-  116: 'F5',
-  117: 'F6',
-  118: 'F7',
-  119: 'F8',
-  120: 'F9',
-  121: 'F10',
-  122: 'F11',
-  123: 'F12',
-  144: 'Num Lock',
-  145: 'Scroll Lock',
-  182: 'My Computer',
-  183: 'My Calculator',
-  186: ';',
-  187: '=',
-  188: ',',
-  189: '-',
-  190: '.',
-  191: '/',
-  192: '`',
-  219: '[',
-  220: '\\',
-  221: ']',
-  222: "'",
-};
-
 interface Game {
   label: string;
   url: string;
@@ -133,27 +29,29 @@ interface Game {
   deletable: boolean;
 }
 
+export class Elements {
+  cartProto = <HTMLDivElement>document.getElementById('cartProto');
+  catchDiv = <HTMLDivElement>document.getElementById('catchDiv');
+  catchGamepad = <HTMLSpanElement>document.getElementById('catchGamepad');
+  catchKey = <HTMLSpanElement>document.getElementById('catchKey');
+  catchName = <HTMLSpanElement>document.getElementById('catchName');
+  controllersToggle = <HTMLInputElement>document.getElementById('controllersToggle');
+  keyBindDiv = <HTMLDivElement>document.getElementById('keyBindDiv');
+  keyBindProto = <HTMLTableRowElement>document.getElementById('keyBindProto');
+  keyBindTable = <HTMLTableElement>document.getElementById('keyBindTable');
+  soundIcon = <HTMLDivElement>document.getElementById('soundIcon');
+  stack = <HTMLDivElement>document.getElementById('stack');
+  stackContainer = <HTMLDivElement>document.getElementById('stackContainer');
+  stackToggle = <HTMLInputElement>document.getElementById('stackToggle');
+}
+
 export class App {
-  _el = {
-    cartProto: <HTMLDivElement>document.getElementById('cartProto'),
-    catchDiv: <HTMLDivElement>document.getElementById('catchDiv'),
-    catchGamepad: <HTMLSpanElement>document.getElementById('catchGamepad'),
-    catchKey: <HTMLSpanElement>document.getElementById('catchKey'),
-    catchName: <HTMLSpanElement>document.getElementById('catchName'),
-    controllersToggle: <HTMLInputElement>document.getElementById('controllersToggle'),
-    keyBindDiv: <HTMLDivElement>document.getElementById('keyBindDiv'),
-    keyBindProto: <HTMLTableRowElement>document.getElementById('keyBindProto'),
-    keyBindTable: <HTMLTableElement>document.getElementById('keyBindTable'),
-    soundIcon: <HTMLDivElement>document.getElementById('soundIcon'),
-    stack: <HTMLDivElement>document.getElementById('stack'),
-    stackContainer: <HTMLDivElement>document.getElementById('stackContainer'),
-    stackToggle: <HTMLInputElement>document.getElementById('stackToggle'),
-  };
-  _inputDialog = new InputDialog(this);
+  _el = new Elements();
+  _inputDialog: InputDialog;
 
   private _games: Game[] = [];
   private _fceux: FceuxModule;
-  private _input: Input;
+  _input: Input;
 
   private _gameLoadedListener = this.handleGameLoaded.bind(this);
   private _dropListener = this.handleDrop.bind(this);
@@ -166,19 +64,23 @@ export class App {
     alert('WebGL context lost. You will need to reload the page.');
     ev.preventDefault();
   };
+  private _beforeUnloadListener = (ev: BeforeUnloadEvent) => {
+    ev.preventDefault();
+    ev.returnValue = '';
+  };
 
-  private _saveFilesInterval;
+  private _saveFilesInterval = 0;
 
   constructor(fceux: FceuxModule) {
     this._fceux = fceux;
     this._input = new Input(fceux.canvas, fceux);
+    this._inputDialog = new InputDialog(this._el, this._input);
 
     this.updateGames();
     this.updateStack();
     this.showStack(true);
 
     this.initConfig(false);
-    this.initInputBindings();
 
     fceux.addEventListener('game-loaded', this._gameLoadedListener);
     document.addEventListener('dragenter', this._dragListener, false);
@@ -186,9 +88,10 @@ export class App {
     document.addEventListener('dragover', this._dragListener, false);
     document.addEventListener('drop', this._dropListener, false);
     fceux.canvas.addEventListener('webglcontextlost', this._contextLostListener, false);
+    window.addEventListener('beforeunload', this._beforeUnloadListener);
 
     // Export saves to localStorage at interval.
-    this._saveFilesInterval = setInterval(() => {
+    this._saveFilesInterval = window.setInterval(() => {
       const md5 = fceux.gameMd5();
       if (md5) {
         const save = fceux.exportSaveFiles();
@@ -210,6 +113,7 @@ export class App {
   dispose() {
     clearInterval(this._saveFilesInterval);
 
+    window.removeEventListener('beforeunload', this._beforeUnloadListener);
     this._fceux.canvas.removeEventListener('webglcontextlost', this._contextLostListener, false);
     document.removeEventListener('drop', this._dropListener, false);
     document.removeEventListener('dragover', this._dragListener, false);
@@ -248,7 +152,7 @@ export class App {
         const opts = { encoding: 'binary' };
         // TODO: Save game otherwise
         // const path = FCEM.pathJoin('/fceux/rom/', f.name);
-        // fceux.FS.writeFile(path, new Uint8Array(e.target.result), opts);
+        // fceux.FS.writeFile(path, new Uint8Array(ev.target.result), opts);
         this.updateGames();
         this.updateStack();
         // FCEM.startGame(path);
@@ -278,8 +182,10 @@ export class App {
       let audioContext;
       if (typeof AudioContext !== 'undefined') {
         audioContext = new AudioContext();
-        // } else if (typeof webkitAudioContext !== 'undefined') {
-        //   audioContext = new webkitAudioContext();
+        // @ts-ignore: For Safari 13.1.
+      } else if (typeof webkitAudioContext !== 'undefined') {
+        // @ts-ignore: For Safari 13.1.
+        audioContext = new webkitAudioContext();
       } else {
         console.error('WebAudio API unavailable.');
       }
@@ -298,14 +204,7 @@ export class App {
     return s.replace(/\/\/+/g, '/');
   }
   updateGames() {
-    const builtIns = [
-      'Streemerz.nes',
-      '2048.nes',
-      'Lawn Mower.nes',
-      'Alter Ego.nes',
-      'Super Bat Puncher (Demo).nes',
-      'Lan Master.nes',
-    ];
+    const builtIns = ['Streemerz.nes', '2048.nes', 'Lawn Mower.nes', 'Alter Ego.nes', 'Super Bat Puncher (Demo).nes', 'Lan Master.nes'];
 
     const calcGameOffset = () => {
       return 3 * ((3 * Math.random()) | 0);
@@ -389,25 +288,25 @@ export class App {
     stackContainer.scrollTop = scrollPos;
   }
 
-  askSelectGame(ev, el) {
+  askSelectGame(ev: MouseEvent, el: HTMLDivElement) {
     const idx = this.askConfirmGame(ev, el, 'Do you want to play');
     if (idx != -1) {
       this.startGame(this._games[idx].url);
     }
     return false;
   }
-  private askConfirmGame(ev, el, q) {
+  private askConfirmGame(ev: MouseEvent, el: HTMLDivElement, q) {
     const games = this._games;
     ev.stopPropagation();
     ev.preventDefault();
-    const idx = el.dataset.idx | 0;
+    const idx = <any>el.dataset.idx * 1;
     if (idx >= 0 && idx < games.length && confirm(q + ' ' + games[idx].label + '?')) {
       return idx;
     } else {
       return -1;
     }
   }
-  askDeleteGame(ev, el) {
+  askDeleteGame(ev: MouseEvent, el: HTMLDivElement) {
     let idx = this.askConfirmGame(ev, el, 'Do you want to delete');
     if (idx != -1) {
       idx = this.askConfirmGame(ev, el, 'ARE YOU REALLY SURE YOU WANT TO DELETE');
@@ -421,110 +320,6 @@ export class App {
     return false;
   }
 
-  // TODO: input binding, move to Input?
-  private getLocalInputDefault(id: string, type: boolean) {
-    // const m = (type ? 'gp' : 'input') + id;
-    // if (localStorage[m] === undefined) {
-    // if (FCEC.inputs[id] === undefined) {
-    //   localStorage[m] = '0'; // NOTE: fallback if the id is undefined
-    // } else {
-    //   localStorage[m] = FCEC.inputs[id][type];
-    // }
-    // }
-    // return localStorage[m] * 1;
-    return 0;
-  }
-  setLocalKey(id: string, key: number) {
-    // localStorage['input' + id] = key;
-  }
-  getLocalKey(id: string) {
-    return this.getLocalInputDefault(id, false);
-  }
-  setLocalGamepad(id: string, binding: number) {
-    // localStorage['gp' + id] = binding;
-  }
-  getLocalGamepad(id: string) {
-    return this.getLocalInputDefault(id, true);
-  }
-  private clearInputBindings() {
-    // for (let id in FCEC.inputs) {
-    //   // clear local bindings
-    //   delete localStorage['input' + id];
-    //   delete localStorage['gp' + id];
-    //   // clear host bindings
-    //   const key = FCEM.getLocalKey(id);
-    //   // fceux.bindKey(0, key);
-    //   // fceux.bindGamepad(id, 0);
-    // }
-  }
-  private syncInputBindings() {
-    // for (let id in FCEC.inputs) {
-    //   const key = FCEM.getLocalKey(id);
-    //   // fceux.bindKey(id, key);
-    //   const binding = FCEM.getLocalGamepad(id);
-    //   // fceux.bindGamepad(id, binding);
-    // }
-  }
-  private initInputBindings() {
-    this.syncInputBindings();
-    this.initKeyBind();
-  }
-  key2Name(key: number) {
-    let keyName = key & 0x0ff ? KEY_CODE_TO_NAME[key & 0x0ff] : '(Unset)';
-    if (keyName === undefined) keyName = '(Unknown)';
-    let prefix = '';
-    if (key & 0x100 && keyName !== 'Ctrl') prefix += 'Ctrl+';
-    if (key & 0x400 && keyName !== 'Alt') prefix += 'Alt+';
-    if (key & 0x200 && keyName !== 'Shift') prefix += 'Shift+';
-    if (key & 0x800 && keyName !== 'Meta') prefix += 'Meta+';
-    return prefix + keyName;
-  }
-  gamepad2Name(binding: number) {
-    const type = binding & 0x03;
-    const pad = (binding & 0x0c) >> 2;
-    const idx = (binding & 0xf0) >> 4;
-    if (!type) return '(Unset)';
-    const typeNames = ['Button', '-Axis', '+Axis'];
-    return 'Gamepad ' + pad + ' ' + typeNames[type - 1] + ' ' + idx;
-  }
-  initKeyBind() {
-    const table = this._el.keyBindTable;
-    // const proto = this._el.keyBindProto;
-
-    while (table.lastChild != table.firstChild) {
-      table.removeChild(<Node>table.lastChild);
-    }
-
-    // for (let id in FCEC.inputs) {
-    //   const item = FCEC.inputs[id];
-    //   const key = FCEM.getLocalKey(id);
-    //   const gamepad = FCEM.getLocalGamepad(id);
-    //   const keyName = FCEM.key2Name(key);
-    //   const gamepadName = FCEM.gamepad2Name(gamepad);
-
-    //   const el = proto.cloneNode(true);
-    //   el.children[0].innerHTML = item[2];
-    //   el.children[1].innerHTML = keyName;
-    //   el.children[2].innerHTML = gamepadName;
-    //   el.children[3].dataset.id = id;
-    //   el.children[3].dataset.name = item[2];
-
-    //   table.appendChild(el);
-    // }
-  }
-  clearBinding(keyBind) {
-    const id = keyBind.dataset.id;
-    // const key = this.getLocalKey(id);
-    // fceux.bindKey(0, key);
-    this.setLocalKey(id, 0);
-    // fceux.bindGamepad(id, 0);
-    this.setLocalGamepad(id, 0);
-    this.initKeyBind();
-  }
-  resetDefaultBindings() {
-    this.clearInputBindings();
-    this.initInputBindings();
-  }
   // TODO: replace use of any
   private setConfig2(id: string, v: any) {
     v = isNaN(v * 1) ? v : v * 1;
@@ -565,12 +360,15 @@ export class App {
       } else {
         document.exitFullscreen();
       }
-      // } else if ('webkitRequestFullscreen' in this._fceux.canvas) {
-      //   if (!document.webkitFullscreenElement) {
-      //     this._fceux.canvas.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-      //   } else {
-      //     document.webkitExitFullscreen();
-      //   }
+    } else if ('webkitRequestFullscreen' in this._fceux.canvas) {
+      // @ts-ignore: For Safari 13.1.
+      if (!document.webkitFullscreenElement) {
+        // @ts-ignore: For Safari 13.1.
+        this._fceux.canvas.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+      } else {
+        // @ts-ignore: For Safari 13.1.
+        document.webkitExitFullscreen();
+      }
     } else {
       console.warn('Fullscreen API unavailable.');
     }
@@ -587,10 +385,6 @@ export class App {
     }
   }
 }
-
-window.onbeforeunload = () => {
-  return 'To prevent save game data loss, please let the game run at least one second after saving and before closing the window.';
-};
 
 const params = {
   print: (...text: string[]) => {
