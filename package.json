@@ -4,7 +4,7 @@
   "version": "0.6.0",
   "description": "Official website for em-fceux.",
   "author": "Valtteri Heikkilä",
-  "license": "MIT",
+  "license": "GPL-2.0",
   "repository": {
     "type": "git",
     "url": "git@bitbucket.org:tsone/em-fceux-site.git"

@@ -51,6 +51,7 @@ export class App {
 
   private _games: Game[] = [];
   private _fceux: FceuxModule;
+  private _canvas: HTMLCanvasElement;
   _input: Input;
 
   private _gameLoadedListener = this.handleGameLoaded.bind(this);
@@ -71,9 +72,11 @@ export class App {
 
   private _saveFilesInterval = 0;
 
-  constructor(fceux: FceuxModule) {
+  constructor(fceux: FceuxModule, canvas: HTMLCanvasElement) {
     this._fceux = fceux;
-    this._input = new Input(fceux.canvas, fceux);
+    this._canvas = canvas;
+
+    this._input = new Input(this._canvas, this._fceux);
     this._inputDialog = new InputDialog(this._el, this._input);
 
     this.updateGames();
@@ -82,19 +85,19 @@ export class App {
 
     this.initConfig(false);
 
-    fceux.addEventListener('game-loaded', this._gameLoadedListener);
+    this._fceux.addEventListener('game-loaded', this._gameLoadedListener);
     document.addEventListener('dragenter', this._dragListener, false);
     document.addEventListener('dragleave', this._dragListener, false);
     document.addEventListener('dragover', this._dragListener, false);
     document.addEventListener('drop', this._dropListener, false);
-    fceux.canvas.addEventListener('webglcontextlost', this._contextLostListener, false);
+    canvas.addEventListener('webglcontextlost', this._contextLostListener, false);
     window.addEventListener('beforeunload', this._beforeUnloadListener);
 
     // Export saves to localStorage at interval.
     this._saveFilesInterval = window.setInterval(() => {
-      const md5 = fceux.gameMd5();
+      const md5 = this._fceux.gameMd5();
       if (md5) {
-        const save = fceux.exportSaveFiles();
+        const save = this._fceux.exportSaveFiles();
         for (let filename in save) {
           save[filename] = Array.from(save[filename]);
         }
@@ -105,7 +108,7 @@ export class App {
     const updateLoop = () => {
       requestAnimationFrame(updateLoop);
       this._input.update();
-      fceux.update();
+      this._fceux.update();
     };
     updateLoop();
   }
@@ -114,7 +117,7 @@ export class App {
     clearInterval(this._saveFilesInterval);
 
     window.removeEventListener('beforeunload', this._beforeUnloadListener);
-    this._fceux.canvas.removeEventListener('webglcontextlost', this._contextLostListener, false);
+    this._canvas.removeEventListener('webglcontextlost', this._contextLostListener, false);
     document.removeEventListener('drop', this._dropListener, false);
     document.removeEventListener('dragover', this._dragListener, false);
     document.removeEventListener('dragleave', this._dragListener, false);
@@ -352,19 +355,19 @@ export class App {
     }
   }
   toggleFullscreen() {
-    if ('requestFullscreen' in this._fceux.canvas) {
+    if ('requestFullscreen' in this._canvas) {
       if (!document.fullscreenElement) {
-        this._fceux.canvas.requestFullscreen().catch(e => {
+        this._canvas.requestFullscreen().catch(e => {
           console.warn("Can't enter fullscreen, " + e.message + '.');
         });
       } else {
         document.exitFullscreen();
       }
-    } else if ('webkitRequestFullscreen' in this._fceux.canvas) {
+    } else if ('webkitRequestFullscreen' in this._canvas) {
       // @ts-ignore: For Safari 13.1.
       if (!document.webkitFullscreenElement) {
         // @ts-ignore: For Safari 13.1.
-        this._fceux.canvas.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+        this._canvas.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
       } else {
         // @ts-ignore: For Safari 13.1.
         document.webkitExitFullscreen();
@@ -377,7 +380,7 @@ export class App {
   // TODO: remove, for debugging
   findFiles(dir: string) {
     try {
-      const list: string[] = fceux.FS.readdir(dir);
+      const list: string[] = this._fceux.FS.readdir(dir);
       const filtered = list.filter(x => x !== '.' && x !== '..');
       return filtered.map(x => this.pathJoin(dir, x));
     } catch (e) {
@@ -393,9 +396,9 @@ const params = {
   printErr: (...text: string[]) => {
     console.error(Array.prototype.slice.call(text).join(' '));
   },
-  canvas: <HTMLCanvasElement>document.getElementById('canvas'),
 };
-const fceux = (globalThis.fceux = FCEUX(params).then(() => {
-  fceux.init();
-  globalThis.app = new App(fceux);
-}));
+globalThis.fceux = FCEUX(params).then(() => {
+  const canvasQuerySelector = '#mycanvas';
+  globalThis.fceux.init(canvasQuerySelector);
+  globalThis.app = new App(globalThis.fceux, <HTMLCanvasElement>document.querySelector(canvasQuerySelector));
+});
