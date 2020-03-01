@@ -22,11 +22,15 @@ import FCEUX, { FceuxModule } from 'em-fceux';
 import { Input } from './input';
 import { InputDialog } from './input-dialog';
 
-interface Game {
+interface StackItem {
   label: string;
   url: string;
   offset: number;
   deletable: boolean;
+}
+
+interface StoredGames {
+  [filename: string]: Array<number>;
 }
 
 export class Elements {
@@ -49,7 +53,7 @@ export class App {
   _el = new Elements();
   _inputDialog: InputDialog;
 
-  private _games: Game[] = [];
+  private _gameStack: StackItem[] = [];
   private _fceux: FceuxModule;
   private _canvas: HTMLCanvasElement;
   _input: Input;
@@ -79,8 +83,8 @@ export class App {
     this._input = new Input(this._canvas, this._fceux);
     this._inputDialog = new InputDialog(this._el, this._input);
 
-    this.updateGames();
     this.updateStack();
+    this.updateStackDom();
     this.showStack(true);
 
     this.initConfig(false);
@@ -97,11 +101,12 @@ export class App {
     this._saveFilesInterval = window.setInterval(() => {
       const md5 = this._fceux.gameMd5();
       if (md5) {
-        const save = this._fceux.exportSaveFiles();
-        for (let filename in save) {
-          save[filename] = Array.from(save[filename]);
+        const saveFiles = this._fceux.exportSaveFiles();
+        const storedSaves = {};
+        for (let filename in saveFiles) {
+          storedSaves[filename] = Array.from(saveFiles[filename]);
         }
-        localStorage['save-' + md5] = JSON.stringify(save);
+        localStorage['save-' + md5] = JSON.stringify(storedSaves);
       }
     }, 1000);
 
@@ -127,6 +132,40 @@ export class App {
     this._input.dispose();
   }
 
+  toggleSound() {
+    this._fceux.setMuted(!this._fceux.muted());
+    this._el.soundIcon.style.backgroundPosition = (!this._fceux.muted() ? '-32' : '-80') + 'px -48px';
+  }
+
+  askSelectGame(ev: MouseEvent, el: HTMLDivElement) {
+    ev.stopPropagation();
+    ev.preventDefault();
+    let idx = <any>el.dataset.idx * 1;
+    if (idx >= 0 && idx < this._gameStack.length) {
+      this.startGame(this._gameStack[idx].url, this._gameStack[idx].deletable);
+    }
+    return false;
+  }
+  askDeleteGame(ev: MouseEvent, el: HTMLDivElement) {
+    ev.stopPropagation();
+    ev.preventDefault();
+    let idx = <any>el.dataset.idx * 1;
+    if (idx >= 0 && idx < this._gameStack.length) {
+      if (confirm('Are you sure you want to delete ' + this._gameStack[idx].label + '?')) {
+        const storedGames = App.storedGames();
+        delete storedGames[this._gameStack[idx].url];
+        App.setStoredGames(storedGames);
+
+        this.updateStack();
+        this.updateStackDom();
+      }
+
+      // Workaround: confirm() stops audio context on Safari 13.1.
+      setTimeout(() => this._fceux.audioContext().resume());
+    }
+    return false;
+  }
+
   private handleGameLoaded() {
     const md5 = this._fceux.gameMd5();
     if (md5 && localStorage.hasOwnProperty('save-' + md5)) {
@@ -149,37 +188,31 @@ export class App {
     ev.stopPropagation();
     ev.preventDefault();
     const f = ev.dataTransfer ? ev.dataTransfer.files[0] : null;
-    if (f && confirm('Do you want to run the game ' + f.name + ' and add it to stack?')) {
+    if (f) {
       const r = new FileReader();
       r.onload = () => {
-        const opts = { encoding: 'binary' };
-        // TODO: Save game otherwise
-        // const path = FCEM.pathJoin('/fceux/rom/', f.name);
-        // fceux.FS.writeFile(path, new Uint8Array(ev.target.result), opts);
-        this.updateGames();
+        const data = new Uint8Array(<ArrayBuffer>r.result);
+        this._fceux.loadGame(data);
+
+        const storedGames = App.storedGames();
+        storedGames[f.name] = Array.from<number>(data);
+        App.setStoredGames(storedGames);
+
         this.updateStack();
-        // FCEM.startGame(path);
+        this.updateStackDom();
       };
       r.readAsArrayBuffer(f);
     }
   }
 
-  showStack(show: boolean) {
+  private showStack(show: boolean) {
     this._el.stackToggle.checked = show === undefined ? !this._el.stackToggle.checked : show;
   }
-  showControls(show: boolean) {
+  private showControls(show: boolean) {
     this._el.controllersToggle.checked = show === undefined ? !this._el.controllersToggle.checked : show;
   }
-  toggleSound() {
-    this._fceux.setMuted(!this._fceux.muted());
-    this._el.soundIcon.style.backgroundPosition = (!this._fceux.muted() ? '-32' : '-80') + 'px -48px';
-  }
 
-  private onDeleteGameSyncFromIDB() {
-    this.updateGames();
-    this.updateStack();
-  }
-  private startGame(url: string) {
+  private startGame(url: string, isStored: boolean) {
     // NOTE: AudioContext must be created from user input.
     if (!this._fceux.audioContext()) {
       let audioContext;
@@ -195,73 +228,60 @@ export class App {
       this._fceux.setAudioContext(audioContext);
     }
 
-    this._fceux.downloadGame(url);
+    if (!isStored) {
+      this._fceux.downloadGame(url);
+    } else {
+      const storedGames = App.storedGames();
+      this._fceux.loadGame(new Uint8Array(storedGames[url]));
+    }
   }
-  private splitPath(filename: string) {
+
+  private static splitPath(filename: string) {
     const splitPathRe = /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
     const split = splitPathRe.exec(filename);
     return split ? split.slice(1) : [];
   }
-  pathJoin(...parts: string[]) {
+  private static pathJoin(...parts: string[]) {
     const s = Array.prototype.slice.call(parts, 0).join('/');
     return s.replace(/\/\/+/g, '/');
   }
-  updateGames() {
+
+  private static storedGames(): { [key: string]: Array<number> } {
+    return localStorage.hasOwnProperty('games') ? JSON.parse(localStorage['games']) : {};
+  }
+  private static setStoredGames(storedGames: StoredGames) {
+    localStorage['games'] = JSON.stringify(storedGames);
+  }
+  private updateStack() {
     const builtIns = ['Streemerz.nes', '2048.nes', 'Lawn Mower.nes', 'Alter Ego.nes', 'Super Bat Puncher (Demo).nes', 'Lan Master.nes'];
 
-    const calcGameOffset = () => {
-      return 3 * ((3 * Math.random()) | 0);
-    };
-
-    const addGame = (filename: string, deletable: boolean): Game => {
-      const split = this.splitPath(filename);
+    this._gameStack = [];
+    const pushGame = (filename: string, deletable: boolean) => {
+      const split = App.splitPath(filename);
       const label = split[2].slice(0, -split[3].length).toUpperCase();
-      const offset = calcGameOffset();
-      return { label: label, url: filename, offset: offset, deletable: deletable };
+      const offset = 3 * ((3 * Math.random()) | 0);
+      this._gameStack.push({ label, url: filename, offset, deletable });
     };
+    for (let filename of builtIns) {
+      pushGame('/games/' + filename, false);
+    }
+    for (let filename in App.storedGames()) {
+      pushGame(filename, true);
+    }
 
-    let games = builtIns.map(filename => {
-      return addGame('/games/' + filename, false);
-    });
-    // files.forEach(function(filename) {
-    //     const split = FCEM.splitPath(filename);
-    //     const label = split[2].slice(0, -split[3].length).toUpperCase();
-    //     const offset = calcGameOffset();
-    //     games.push({label:label, path:filename, offset:offset, deletable:deletable});
-    //   });
-    // const addGamesIn = function(path, deletable) {
-    //   const files = findFiles(path);
-    //   files.forEach(function(filename) {
-    //     const split = FCEM.splitPath(filename);
-    //     const label = split[2].slice(0, -split[3].length).toUpperCase();
-    //     const offset = calcGameOffset();
-    //     games.push({label:label, path:filename, offset:offset, deletable:deletable});
-    //   });
-    // };
-
-    // addGamesIn('/data/games/', false);
-    // addGamesIn('/fceux/rom/', true);
-
-    // sort in alphabetic order and assign as new games list
-    games.sort((a, b) => {
-      return a.label < b.label ? -1 : a.label > b.label ? 1 : 0;
-    });
-    this._games = games;
+    this._gameStack.sort((a, b) => a.label < b.label ? -1 : a.label > b.label ? 1 : 0);
   }
-  updateStack() {
-    const games = this._games;
+  private updateStackDom() {
     const stackContainer = this._el.stackContainer;
     const scrollPos = stackContainer.scrollTop;
     const list = this._el.stack;
-    // const proto = this._el.cartProto;
 
     while (list.firstChild != list.lastChild) {
       list.removeChild(<Node>list.lastChild);
     }
 
-    for (let i = 0; i < games.length; i++) {
-      const item = games[i];
-      // TODO: don't use any
+    for (let i = 0; i < this._gameStack.length; ++i) {
+      const item = this._gameStack[i];
       const el = <any>this._el.cartProto.cloneNode(true);
 
       el.dataset.idx = i;
@@ -291,56 +311,22 @@ export class App {
     stackContainer.scrollTop = scrollPos;
   }
 
-  askSelectGame(ev: MouseEvent, el: HTMLDivElement) {
-    const idx = this.askConfirmGame(ev, el, 'Do you want to play');
-    if (idx != -1) {
-      this.startGame(this._games[idx].url);
-    }
-    return false;
-  }
-  private askConfirmGame(ev: MouseEvent, el: HTMLDivElement, q) {
-    const games = this._games;
-    ev.stopPropagation();
-    ev.preventDefault();
-    const idx = <any>el.dataset.idx * 1;
-    if (idx >= 0 && idx < games.length && confirm(q + ' ' + games[idx].label + '?')) {
-      return idx;
-    } else {
-      return -1;
-    }
-  }
-  askDeleteGame(ev: MouseEvent, el: HTMLDivElement) {
-    let idx = this.askConfirmGame(ev, el, 'Do you want to delete');
-    if (idx != -1) {
-      idx = this.askConfirmGame(ev, el, 'ARE YOU REALLY SURE YOU WANT TO DELETE');
-      if (idx != -1) {
-        // TODO: remove game rom
-        // const item = FCEM.games.slice(idx, idx+1)[0];
-        // fceux.FS.unlink(item.path);
-        // fceux.FS.syncfs(FCEM.onDeleteGameSyncFromIDB);
-      }
-    }
-    return false;
-  }
-
-  // TODO: replace use of any
-  private setConfig2(id: string, v: any) {
-    v = isNaN(v * 1) ? v : v * 1;
-    this._fceux.setConfig(id, v);
-    localStorage[id] = v;
+  private storeConfig(id: string, v: string | number) {
+    const x = isNaN(+v) ? v : +v;
+    this._fceux.setConfig(id, x);
+    localStorage[id] = x;
   }
   setConfig(el: HTMLInputElement) {
-    this.setConfig2(el.id, el.type == 'checkbox' ? el.checked : el.value);
+    this.storeConfig(el.id, el.type == 'checkbox' ? (el.checked ? 1 : 0) : el.value);
   }
-  private setControllerEl(id: string, val: any) {
+  private setControllerEl(id: string, val: string | number) {
     const el = <HTMLInputElement>document.getElementById(id);
-    if (!el) {
-      return;
-    }
-    if (el.tagName == 'SELECT' || el.type == 'range') {
-      el.value = val;
-    } else if (el.type == 'checkbox') {
-      el.checked = val;
+    if (el) {
+      if (el.tagName == 'SELECT' || el.type == 'range') {
+        el.value = <string>val;
+      } else if (el.type == 'checkbox') {
+        el.checked = !!val;
+      }
     }
   }
   initConfig(reset: boolean) {
@@ -348,9 +334,9 @@ export class App {
       let v = this._fceux.defaultConfig[id];
       if (!reset && localStorage.hasOwnProperty(id)) {
         v = localStorage[id];
-        v = isNaN(v * 1) ? v : v * 1;
+        v = isNaN(+v) ? v : +v;
       }
-      this.setConfig2(id, v);
+      this.storeConfig(id, v);
       this.setControllerEl(id, v);
     }
   }
@@ -377,16 +363,16 @@ export class App {
     }
   }
 
-  // TODO: remove, for debugging
-  findFiles(dir: string) {
-    try {
-      const list: string[] = this._fceux.FS.readdir(dir);
-      const filtered = list.filter(x => x !== '.' && x !== '..');
-      return filtered.map(x => this.pathJoin(dir, x));
-    } catch (e) {
-      return [];
-    }
-  }
+  // DEBUG
+  // findFiles(dir: string) {
+  //   try {
+  //     const list: string[] = this._fceux.FS.readdir(dir);
+  //     const filtered = list.filter(x => x !== '.' && x !== '..');
+  //     return filtered.map(x => App.pathJoin(dir, x));
+  //   } catch (e) {
+  //     return [];
+  //   }
+  // }
 }
 
 const params = {
