@@ -2,59 +2,50 @@
 
 https://bitbucket.org/tsone/em-fceux-site/
 
-Nintendo Entertainment System / Famicom emulator for the web.
+A web Nintendo Entertainment System/Famicom (NES/FC) emulator.
 
 Try it at https://tsone.kapsi.fi/em-fceux/.
 
-## Overview
-
-The emulator uses [em-fceux](https://bitbucket.org/tsone/em-fceux/) emulation
-core. Among other things it supports battery-backed save RAM, save states, input
-bindings (also to gamepad/joystick). It also has NTSC video signal and CRT TV
-emulation, and a "stack of games" for that 80's/90's retro gaming experience.
+The emulation is achieved with [em-fceux](https://bitbucket.org/tsone/em-fceux/), an [Emscripten](http://emscripten.org) port of the [FCEUX](http://www.fceux.com/) emulator.
 
 ## Features
 
-- NTSC and PAL system emulation.
+- Real-time emulation with low input latency.
 - Save states and battery-backed SRAM.
 - Support for two game controllers.
 - Zapper support.
-- Customizeable input bindings to keyboard or gamepad/joysticks.
-- Support for .nes, .zip and .nsf game file formats (drag and drop).
+- Custom keyboard and gamepad input bindings.
+- Support for NES, ZIP and NSF file formats.
+- NTSC and PAL modes.
 - NTSC composite video emulation.
-- CRT TV screen emulation.
+- CRT TV emulation.
 
 ## Setup
 
 1. Have [npm](https://www.npmjs.com/get-npm).
-   - Note, Emscripten has `npm`, and it's set to env by `source emsdk_env.sh`.
+   - Note: Emscripten SDK (emsdk) has `npm` built-in. Use `source emsdk_env.sh` to set it to env.
 2. Run `npm install`.
 
 ## Build
 
-`npm start` for development build, running `webpack-dev-server`.
+`npm start` for development build (`webpack-dev-server`).
 
-`npm run build` for a release build, with result at `dist/`.
+`npm run build` for a release build. Result will be at `dist/`.
 
 ## Browser Requirements
 
-- WebAssembly.
-- WebGL.
-- Web Audio API.
-- localStorage.
-- Gamepad API.
-
-Recent Chrome, Firefox or macOS Safari will work.
+- [WebAssembly](https://webassembly.org/).
+- [WebGL](https://www.khronos.org/webgl/).
+- [Web Audio API](https://www.w3.org/TR/webaudio/).
+- [Web Storage API (localStorage)](https://html.spec.whatwg.org/multipage/webstorage.html).
+- [Gamepad API](https://www.w3.org/TR/gamepad/).
 
 ## Contact
 
 Authored by Valtteri "tsone" Heikkilä. See git commits for email.
 
-Please submit bugs and feature requests at
-[em-fceux issue tracker](https://bitbucket.org/tsone/em-fceux/issues/).
+Please submit bugs and feature requests in the em-fceux project [issue tracker](https://bitbucket.org/tsone/em-fceux/issues/).
 
-## Legal
+## License
 
-Licensed under [GNU GPL Version 2](https://www.gnu.org/licenses/gpl-2.0.txt).
-
-Built-in games are distributed by permission from the authors.
+Licensed under [GNU GPL 2](https://www.gnu.org/licenses/gpl-2.0.txt) excluding the built-in games which are distributed by permission from the authors.

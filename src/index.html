@@ -65,10 +65,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <table id="controllers">
 
       <tr><td colspan="2"><h4>PICTURE CONTROLS</h4>
-      <tr><td>Brightness<td><input id="video-brightness" type="range" min="-1" max="1" step="0.2" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
-      <tr><td>Contrast<td><input id="video-contrast" type="range" min="-1" max="1" step="0.2" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
-      <tr><td>Color<td><input id="video-color" type="range" min="-1" max="1" step="0.2" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
-      <tr><td>Gamma<td><input id="video-gamma" type="range" min="-1" max="1" step="0.2" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
+      <tr><td>Brightness<td><input id="video-brightness" type="range" min="-1" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
+      <tr><td>Contrast<td><input id="video-contrast" type="range" min="-1" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
+      <tr><td>Color<td><input id="video-color" type="range" min="-1" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
+      <tr><td>Gamma<td><input id="video-gamma" type="range" min="-1" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
 
       <tr><td colspan="2"><h4>NTSC EMULATION</h4>
       <tr><td>NTSC Emulation*<td><input id="video-ntsc" type="checkbox" checked oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><label for="video-ntsc"></label>
@@ -87,7 +87,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <tr><td>Video System<td><select id="video-system" onchange="app.setConfig(this)"><option value="auto">(Auto)</option><option value="ntsc">NTSC</option><option value="pal">PAL</option></select>
     </table>
     <p><input type="button" value="Reset to Defaults" onclick="app.initConfig(true)" />
-    <p><i><small>* NTSC composite signal path emulation.</small></i>
+    <p><i><small>* NTSC composite video signal.</small></i>
     <!-- <input type="button" value="Dump FS" onclick="function dump(f) { console.log('!!! ' + f); app.findFiles(f).forEach(dump); }; dump('/');" /> -->
   </div>
   <label id="controllersToggleLabel" for="controllersToggle"></label>
@@ -146,20 +146,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <img id="helpIndicator" width="48" height="48" src="img/indicator.gif" alt="flashing indicator" />
 
     <h2>EM-FCEUX</h2>
-    <p>em-fceux is an <a href="http://emscripten.org/">Emscripten</a> port of <a href="http://www.fceux.com/">FCEUX</a>.
-    Code: <a href="https://bitbucket.org/tsone/em-fceux/">https://bitbucket.org/tsone/em-fceux/</a>
+    <p>em-fceux is a web port of the <a href="http://www.fceux.com/">FCEUX</a> open-source NES emulator.
+    <p>Source code: <a href="https://bitbucket.org/tsone/em-fceux-site/">em-fceux-site</a> (this site)
+    and <a href="https://bitbucket.org/tsone/em-fceux/">em-fceux</a> (FCEUX, emulation core).
 
     <h3>INSTRUCTIONS</h3>
-    <p>To play a game, drag and drop it (ROM file etc.) on this browser window.
-    Played games are added to the game stack on the right. Play the game again by clicking it on the stack.
-    <p>To remove a game, click <img src="img/x.gif" width=19 height=19 alt="X icon"/> on the game.
-    This doesn't remove save data however. Built-in games cannot be removed.
-    <p>Supported file formats are: <i>.nes, .nsf, .zip</i>
+    <p>Play a game by selecting from the game stack on the right.
+    Add a game by dropping it to this window (supported file formats: NES, ZIP, NSF).
+    Remove a game by clicking <img src="img/x.gif" width=19 height=19 alt="X icon"/>.
 
     <h3>INPUTS</h3>
-
-    <p>Input bindings can be customized by clicking <img src="img/dpad_sm.gif" width=20 height=20 alt="key bindings icon" /> icon in top right corner of the window.
-    <p>Default keyboard keys are:
+    <p>Inputs can be customized by clicking <img src="img/dpad_sm.gif" width=20 height=20 alt="key bindings icon" /> on the top menu.
+    Defaults:
     <table>
       <tr><td><b>Input</b><td><b>Key</b>
       <tr><td>Directional Pad (Controller 1)<td>Arrow Keys
@@ -168,33 +166,37 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <tr><td>Select (Controller 1)<td>S
       <tr><td>Start (Controller 1)<td>Enter
       <tr><td>Reset System<td>Ctrl+R
-      <tr><td>Exit Full-screen Mode<td>Esc
       <tr><td>Speed Throttle<td>Tab
       <tr><td>Select Save State<td>0-9
       <tr><td>Save Save State<td>F5
       <tr><td>Load Save State<td>F7
       <tr><td>Pause Emulation<td>P
       <tr><td>Single Frame Step<td>\ (Backslash)
+      <tr><td>Exit Fullscreen Mode<td>Esc
     </table>
-    <p>To shoot with Zapper (if selected as controller), simply click on mouse button where you want to shoot.
-    It is recommended to disable TV emulation when using Zapper.
+    <p>Use mouse to trigger Zapper.
 
-    <h3>SETTINGS TAB</h3>
-    <p>The settings tab is revealed by clicking the (pixelated) triangle on the left.
-    The tab has controllers for composite NTSC and TV emulation, gamma, sharpness, color etc.
+    <h3>SETTINGS</h3>
+    <p>Reveal settings by clicking the pixelated triangle on the left.
+    There are video and system settings, for example brightness, sharpness, color, NTSC signal emulation
+    and PAL and NTSC system modes.
 
     <h3>TROUBLESHOOTING</h3>
-    <p>In case of issues with audio or the site is not working at all, try using a recent web browser,
-    such as Firefox, Chromium, Chrome, Safari or Opera. Internet Explorer 11 will not work.
-    <p>If input responsiveness is poor (frame rate is low), try disabling TV emulation or using the full-screen mode.
-    <p>In case a game appears running too fast, try changing to PAL mode in the settings.
-    <p>The user interface and inputs are designed for keyboard and mouse. There is no support (yet) for touch-only devices.
-    <p>To file a bug or a feature request, do it in the project <a href="https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open">issue tracker</a>. This may require a bitbucket.org account.
+    <p>Low frame rate: Disable CRT TV emulation in the settings. Also try fullscreen mode.
+    <p>Game plays too fast/slow: Try changing to PAL or NTSC mode in the settings.
+    <p>Other issues: Try another browser. If the issue persists,
+    <a href="https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open">report</a> a bug.
+    Tested to work on latest versions of Firefox, Chrome/Chromium and Safari (March 2020).
+    <p>Can't play on iPhone/Android: Touch input is not supported yet. Maybe you can
+    <a href="https://bitbucket.org/tsone/em-fceux/issues/10/support-for-touchscreen-devices">help</a>?
 
-    <h3>NOTES</h3>
-    <p>Games and save data are stored locally in the web browser and are never transmitted out of the browser.
-    <p>Please refer to <a href="https://bitbucket.org/tsone/em-fceux/">em-fceux repository</a> for more technical information.
-    <p>em-fceux and FCEUX are licensed under <a href="gpl-2.0.txt">GNU GPL Version 2</a>.
+    <h3>GET INVOLVED</h3>
+    <p>Report bugs and request freatures via the <a href="https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open">issue tracker</a>.
+
+    <h3>OTHER INFORMATION</h3>
+    <p>Licensed under <a href="gpl-2.0.txt">GNU GPL 2</a> excluding the built-in games which are distributed by permission from the authors.
+    <p>The games and save data is stored locally <i>in your browser only</i>. The site has no tracking, analytics or cookies.
+    <p>Powered by <a href="http://emscripten.org/">Emscripten</a>.
     <p>Version: 0.6.0
     <br/><br/>
   </div>
