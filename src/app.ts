@@ -269,7 +269,7 @@ export class App {
       pushGame(filename, true);
     }
 
-    this._gameStack.sort((a, b) => a.label < b.label ? -1 : a.label > b.label ? 1 : 0);
+    this._gameStack.sort((a, b) => (a.label < b.label ? -1 : a.label > b.label ? 1 : 0));
   }
   private updateStackDom() {
     const stackContainer = this._el.stackContainer;
