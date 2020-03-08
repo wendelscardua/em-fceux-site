@@ -104,7 +104,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 <input id="helpToggle" type="checkbox" hidden />
 <div class="icon" id="fullscreenIcon" onclick="app.toggleFullscreen()"></div>
-<div class="icon" id="soundIcon" onclick="app.toggleSound()"></div>
+<div class="icon" id="soundIcon" onclick="app.toggleMuted()"></div>
 <label class="icon" id="helpIcon" for="helpToggle"></label>
 
 <div id="keyBindDiv">
@@ -126,7 +126,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </div>
   </div>
 </div>
-<div class="icon" id="dpadIcon" onclick="app._inputDialog.toggleShow()"></div>
+<div class="icon" id="dpadIcon" onclick="app.toggleInputBindings()"></div>
 
 <div id="catchDiv">
   <div class="dimmer"></div>

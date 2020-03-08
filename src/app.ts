@@ -51,12 +51,15 @@ export class Elements {
 
 export class App {
   _el = new Elements();
-  _inputDialog: InputDialog;
+  _inputDialog?: InputDialog;
+  _input?: Input;
+
+  private _fceux: FceuxModule;
+  private _canvasSelector: string;
+  private _canvas: HTMLCanvasElement;
 
   private _gameStack: StackItem[] = [];
-  private _fceux: FceuxModule;
-  private _canvas: HTMLCanvasElement;
-  _input: Input;
+  private _initialized = false;
 
   private _gameLoadedListener = this.handleGameLoaded.bind(this);
   private _dropListener = this.handleDrop.bind(this);
@@ -76,26 +79,30 @@ export class App {
 
   private _saveFilesInterval = 0;
 
-  constructor(fceux: FceuxModule, canvas: HTMLCanvasElement) {
+  constructor(fceux: FceuxModule, canvasSelector: string) {
     this._fceux = fceux;
-    this._canvas = canvas;
-
-    this._input = new Input(this._canvas, this._fceux);
-    this._inputDialog = new InputDialog(this._el, this._input);
+    this._canvasSelector = canvasSelector;
+    this._canvas = <HTMLCanvasElement>document.querySelector(canvasSelector);
 
     this.updateStack();
     this.updateStackDom();
     this.showStack(true);
 
-    this.initConfig(false);
-
-    this._fceux.addEventListener('game-loaded', this._gameLoadedListener);
     document.addEventListener('dragenter', this._dragListener, false);
     document.addEventListener('dragleave', this._dragListener, false);
     document.addEventListener('dragover', this._dragListener, false);
     document.addEventListener('drop', this._dropListener, false);
-    canvas.addEventListener('webglcontextlost', this._contextLostListener, false);
+    this._canvas.addEventListener('webglcontextlost', this._contextLostListener, false);
     window.addEventListener('beforeunload', this._beforeUnloadListener);
+  }
+
+  init() {
+    this._fceux.init(this._canvasSelector);
+    this._initialized = true;
+
+    this.initConfig(false);
+
+    this._fceux.addEventListener('game-loaded', this._gameLoadedListener);
 
     // Export saves to localStorage at interval.
     this._saveFilesInterval = window.setInterval(() => {
@@ -110,16 +117,27 @@ export class App {
       }
     }, 1000);
 
+    this._input = new Input(this._canvas, this._fceux);
+    this._inputDialog = new InputDialog(this._el, this._input);
+
     const updateLoop = () => {
-      requestAnimationFrame(updateLoop);
-      this._input.update();
-      this._fceux.update();
+      if (this._initialized) {
+        window.requestAnimationFrame(updateLoop);
+        (<Input>this._input).update();
+        this._fceux.update();
+      }
     };
-    updateLoop();
+    window.requestAnimationFrame(updateLoop);
   }
 
   dispose() {
-    clearInterval(this._saveFilesInterval);
+    if (this._initialized) {
+      (<InputDialog>this._inputDialog).dispose();
+      (<Input>this._input).dispose();
+      clearInterval(this._saveFilesInterval);
+      this._fceux.removeEventListener(this._gameLoadedListener);
+      this._initialized = false;
+    }
 
     window.removeEventListener('beforeunload', this._beforeUnloadListener);
     this._canvas.removeEventListener('webglcontextlost', this._contextLostListener, false);
@@ -127,14 +145,6 @@ export class App {
     document.removeEventListener('dragover', this._dragListener, false);
     document.removeEventListener('dragleave', this._dragListener, false);
     document.removeEventListener('dragenter', this._dragListener, false);
-    this._fceux.removeEventListener(this._gameLoadedListener);
-
-    this._input.dispose();
-  }
-
-  toggleSound() {
-    this._fceux.setMuted(!this._fceux.muted());
-    this._el.soundIcon.style.backgroundPosition = (!this._fceux.muted() ? '-32' : '-80') + 'px -48px';
   }
 
   askSelectGame(ev: MouseEvent, el: HTMLDivElement) {
@@ -161,7 +171,9 @@ export class App {
       }
 
       // Workaround: confirm() stops audio context on Safari 13.1.
-      setTimeout(() => this._fceux.audioContext().resume());
+      if (this._initialized) {
+        setTimeout(() => (<AudioContext>this._fceux._audioContext).resume());
+      }
     }
     return false;
   }
@@ -192,7 +204,9 @@ export class App {
       const r = new FileReader();
       r.onload = () => {
         const data = new Uint8Array(<ArrayBuffer>r.result);
-        this._fceux.loadGame(data);
+        if (this._initialized) {
+          this._fceux.loadGame(data);
+        }
 
         const storedGames = App.storedGames();
         storedGames[f.name] = Array.from<number>(data);
@@ -213,19 +227,8 @@ export class App {
   }
 
   private startGame(url: string, isStored: boolean) {
-    // NOTE: AudioContext must be created from user input.
-    if (!this._fceux.audioContext()) {
-      let audioContext;
-      if (typeof AudioContext !== 'undefined') {
-        audioContext = new AudioContext();
-        // @ts-ignore: For Safari 13.1.
-      } else if (typeof webkitAudioContext !== 'undefined') {
-        // @ts-ignore: For Safari 13.1.
-        audioContext = new webkitAudioContext();
-      } else {
-        console.error('WebAudio API unavailable.');
-      }
-      this._fceux.setAudioContext(audioContext);
+    if (!this._initialized) {
+      this.init();
     }
 
     if (!isStored) {
@@ -313,7 +316,9 @@ export class App {
 
   private storeConfig(id: string, v: string | number) {
     const x = isNaN(+v) ? v : +v;
-    this._fceux.setConfig(id, x);
+    if (this._initialized) {
+      this._fceux.setConfig(id, x);
+    }
     localStorage[id] = x;
   }
   setConfig(el: HTMLInputElement) {
@@ -330,8 +335,8 @@ export class App {
     }
   }
   initConfig(reset: boolean) {
-    for (let id in this._fceux.defaultConfig) {
-      let v = this._fceux.defaultConfig[id];
+    for (let id in this._fceux._defaultConfig) {
+      let v = this._fceux._defaultConfig[id];
       if (!reset && localStorage.hasOwnProperty(id)) {
         v = localStorage[id];
         v = isNaN(+v) ? v : +v;
@@ -362,6 +367,17 @@ export class App {
       console.warn('Fullscreen API unavailable.');
     }
   }
+  toggleMuted() {
+    if (this._initialized) {
+      this._fceux.setMuted(!this._fceux.muted());
+      this._el.soundIcon.style.backgroundPosition = (!this._fceux.muted() ? '-32' : '-80') + 'px -48px';
+    }
+  }
+  toggleInputBindings() {
+    if (this._initialized) {
+      (<InputDialog>this._inputDialog).toggleShow();
+    }
+  }
 
   // DEBUG
   // findFiles(dir: string) {
@@ -384,7 +400,5 @@ const params = {
   },
 };
 globalThis.fceux = FCEUX(params).then(() => {
-  const canvasQuerySelector = '#mycanvas';
-  globalThis.fceux.init(canvasQuerySelector);
-  globalThis.app = new App(globalThis.fceux, <HTMLCanvasElement>document.querySelector(canvasQuerySelector));
+  globalThis.app = new App(globalThis.fceux, '#mycanvas');
 });

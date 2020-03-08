@@ -38,14 +38,14 @@ export class InputDialog {
     this.reset();
   }
 
+  dispose() {
+    this.removeListeners();
+  }
+
   private handleKeyDown() {
     const keys = Array.from(this._input._keySet);
     this._el.catchKey.innerHTML = InputDialog.formatKeys(keys);
     this._catchKeys = keys;
-  }
-
-  dispose() {
-    this.removeListeners();
   }
 
   toggleShow() {
