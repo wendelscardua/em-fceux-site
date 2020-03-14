@@ -43,7 +43,10 @@ export class Elements {
   keyBindDiv = <HTMLDivElement>document.getElementById('keyBindDiv');
   keyBindProto = <HTMLTableRowElement>document.getElementById('keyBindProto');
   keyBindTable = <HTMLTableElement>document.getElementById('keyBindTable');
+  fullscreenIcon = <HTMLDivElement>document.getElementById('fullscreenIcon');
   soundIcon = <HTMLDivElement>document.getElementById('soundIcon');
+  dpadIcon = <HTMLDivElement>document.getElementById('dpadIcon');
+  introDiv = <HTMLDivElement>document.getElementById('introDiv');
   stack = <HTMLDivElement>document.getElementById('stack');
   stackContainer = <HTMLDivElement>document.getElementById('stackContainer');
   stackToggle = <HTMLInputElement>document.getElementById('stackToggle');
@@ -87,6 +90,7 @@ export class App {
     this.updateStack();
     this.updateStackDom();
     this.showStack(true);
+    this.initConfig(false);
 
     document.addEventListener('dragenter', this._dragListener, false);
     document.addEventListener('dragleave', this._dragListener, false);
@@ -229,6 +233,11 @@ export class App {
   private startGame(url: string, isStored: boolean) {
     if (!this._initialized) {
       this.init();
+
+      this._el.introDiv.style.display = 'none';
+      this._el.dpadIcon.style.display = 'block';
+      this._el.fullscreenIcon.style.display = 'block';
+      this._el.soundIcon.style.display = 'block';
     }
 
     if (!isStored) {

@@ -59,6 +59,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   PLEASE ENABLE JAVASCRIPT em-fceux requires JavaScript
 </noscript>
 
+<div id="introDiv">
+  <div id="intro">
+    <h1>EM-FCEUX</h1>
+    <p>A web NES emulator.
+    <br/>
+    <h3>Choose a game<img width="20" height="20" src="img/right.gif" alt="arrow pointing right" style="margin-bottom: -4px" /></h3>
+    <h3><img width="20" height="20" src="img/right.gif" alt="arrow pointing left" style="margin-bottom: -4px; transform: rotate(180deg)" />Reveal settings</h3>
+  </div>
+</div>
+
 <input id="controllersToggle" type="checkbox" hidden />
 <div id="controllersTab">
   <div id="controllersContainer">
@@ -87,7 +97,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <tr><td>Video System<td><select id="video-system" onchange="app.setConfig(this)"><option value="auto">(Auto)</option><option value="ntsc">NTSC</option><option value="pal">PAL</option></select>
     </table>
     <p><input type="button" value="Reset to Defaults" onclick="app.initConfig(true)" />
-    <p><i><small>* NTSC composite video signal.</small></i>
+    <p><i><small>* NTSC composite video.</small></i>
     <!-- <input type="button" value="Dump FS" onclick="function dump(f) { console.log('!!! ' + f); app.findFiles(f).forEach(dump); }; dump('/');" /> -->
   </div>
   <label id="controllersToggleLabel" for="controllersToggle"></label>
@@ -146,14 +156,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <img id="helpIndicator" width="48" height="48" src="img/indicator.gif" alt="flashing indicator" />
 
     <h2>EM-FCEUX</h2>
-    <p>em-fceux is a web port of the <a href="http://www.fceux.com/">FCEUX</a> open-source NES emulator.
-    <p>Source code: <a href="https://bitbucket.org/tsone/em-fceux-site/">em-fceux-site</a> (this site)
-    and <a href="https://bitbucket.org/tsone/em-fceux/">em-fceux</a> (FCEUX, emulation core).
+    <p>em-fceux is a web port of the <a href="http://www.fceux.com/">FCEUX</a> NES emulator.
 
     <h3>INSTRUCTIONS</h3>
-    <p>Play a game by selecting from the game stack on the right.
-    Add a game by dropping it to this window (supported file formats: NES, ZIP, NSF).
-    Remove a game by clicking <img src="img/x.gif" width=19 height=19 alt="X icon"/>.
+    <p>To play a game, select it game from the stack on the right.
+    Add more games by dropping them on the window (formats: NES, ZIP, NSF).
+    Remove a games by clicking <img src="img/x.gif" width=19 height=19 alt="X icon"/>.
 
     <h3>INPUTS</h3>
     <p>Inputs can be customized by clicking <img src="img/dpad_sm.gif" width=20 height=20 alt="key bindings icon" /> on the top menu.
@@ -178,26 +186,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
     <h3>SETTINGS</h3>
     <p>Reveal settings by clicking the pixelated triangle on the left.
-    There are video and system settings, for example brightness, sharpness, color, NTSC signal emulation
-    and PAL and NTSC system modes.
+    There are video and system settings, for example brightness, sharpness, color,
+    NTSC signal emulation and PAL and NTSC system modes.
 
     <h3>TROUBLESHOOTING</h3>
-    <p>Low frame rate: Disable CRT TV emulation in the settings. Also try fullscreen mode.
+    <p>Low frame rate: Disable CRT TV emulation in settings. Also try fullscreen mode.
     <p>Game plays too fast/slow: Try changing to PAL or NTSC mode in the settings.
-    <p>Other issues: Try another browser. If the issue persists,
+    <p>Other issues: Try with another browser, and if the issue persists,
     <a href="https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open">report</a> a bug.
     Tested to work on latest versions of Firefox, Chrome/Chromium and Safari (March 2020).
     <p>Can't play on iPhone/Android: Touch input is not supported yet. Maybe you can
     <a href="https://bitbucket.org/tsone/em-fceux/issues/10/support-for-touchscreen-devices">help</a>?
 
-    <h3>GET INVOLVED</h3>
-    <p>Report bugs and request freatures via the <a href="https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open">issue tracker</a>.
+    <h3>CONTACT AND CONTRIBUTING</h3>
+    <p>Report bugs and feature requests in the
+    <a href="https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open">issue tracker</a>.
+    <p>Contributions are welcome! The projects are:
+    <a href="https://bitbucket.org/tsone/em-fceux/">em-fceux</a> (FCEUX port, "emulation core")
+    and <a href="https://bitbucket.org/tsone/em-fceux-site/">em-fceux-site</a> (this site).
 
     <h3>OTHER INFORMATION</h3>
-    <p>Licensed under <a href="gpl-2.0.txt">GNU GPL 2</a> excluding the built-in games. The games are distributed by permission from the authors.
-    <p>The games and save data is stored locally <i>in your browser only</i>. The site has no tracking, analytics or cookies.
+    <p>Licensed under <a href="gpl-2.0.txt">GNU GPL 2</a> excluding the built-in games.
+    The games are distributed by permission from the authors.
+    <p>The games and save data is stored locally <i>in your browser only</i>.
+    The site has no tracking, analytics or cookies.
     <p>Powered by <a href="http://emscripten.org/">Emscripten</a>.
-    <p>Version: 0.6.0
+    <p>Version: 1.0.0
     <br/><br/>
   </div>
   </div>

@@ -132,14 +132,18 @@ img.preload {
   text-align: center;
 }
 
-#fullscreenIcon,
-#soundIcon,
-#dpadIcon,
 #helpIcon,
 #controllersToggleLabel,
 #stackToggleLabel,
 .cart {
   cursor: pointer;
+}
+
+#fullscreenIcon,
+#soundIcon,
+#dpadIcon {
+  cursor: pointer;
+  display: none;
 }
 
 #controllersTab {
@@ -468,6 +472,20 @@ img.preload {
   font-weight: normal;
   font-style: normal;
   color: #fc0000;
+}
+
+#intro {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 580px;
+  height: 260px;
+  margin-left: -290px;
+  margin-top: -130px;
+  text-align: center;
+}
+#intro > p {
+  margin-left: -23px;
 }
 
 table {
