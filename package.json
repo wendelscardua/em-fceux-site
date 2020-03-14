@@ -1,14 +1,39 @@
 {
   "name": "em-fceux-site",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.6.0",
   "description": "Official website for em-fceux.",
+  "homepage": "https://tsone.kapsi.fi/em-fceux/",
   "author": "Valtteri Heikkilä",
   "license": "GPL-2.0",
   "repository": {
     "type": "git",
     "url": "git@bitbucket.org:tsone/em-fceux-site.git"
   },
+  "bugs": {
+    "url": "https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open"
+  },
+  "keywords": [
+    "emscripten",
+    "emulator",
+    "famicom",
+    "gamepad",
+    "gamepad api",
+    "nes",
+    "nintendo",
+    "wasm",
+    "webassembly",
+    "webaudio",
+    "web audio",
+    "webgl"
+  ],
+  "files": [
+    "CHANGELOG.md",
+    "COPYING",
+    "dist/",
+    "package.json",
+    "README.md"
+  ],
   "scripts": {
     "build": "npm run prettier && webpack --mode production",
     "clean": "rm -rf dist",
@@ -18,7 +43,7 @@
   },
   "devDependencies": {
     "clean-webpack-plugin": "^3.0.0",
-    "em-fceux": "^0.6.0",
+    "em-fceux": "^1.0.0",
     "html-webpack-deploy-plugin": "^2.0.6",
     "html-webpack-plugin": "^3.2.0",
     "prettier": "1.19.1",

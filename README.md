@@ -22,12 +22,20 @@ http://localhost:8080/.
 
 For release, run `npm run build` to create a deployable site in `dist/`.
 
+## Browser Requirements
+
+- [WebAssembly](https://webassembly.org/).
+- [WebGL](https://www.khronos.org/webgl/).
+- [Web Audio API](https://www.w3.org/TR/webaudio/).
+- [Web Storage API (localStorage)](https://html.spec.whatwg.org/multipage/webstorage.html).
+- [Gamepad API](https://www.w3.org/TR/gamepad/).
+
 ## Contact
 
-Authored by Valtteri "tsone" Heikkilä. See git commits for email.
+Authored by Valtteri "tsone" Heikkilä.
 
 Please submit bugs and feature requests in the
-[em-fceux issue tracker](https://bitbucket.org/tsone/em-fceux/issues/).
+[em-fceux issue tracker](https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open).
 
 ## License
 
