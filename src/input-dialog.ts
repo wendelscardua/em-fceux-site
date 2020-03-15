@@ -48,8 +48,16 @@ export class InputDialog {
     this._catchKeys = keys;
   }
 
+  isShown() {
+    return this._el.keyBindDiv.style.display == 'block';
+  }
+  show(show: boolean) {
+    if (!this.isCatching()) {
+      this._el.keyBindDiv.style.display = show ? 'block' : 'none';
+    }
+  }
   toggleShow() {
-    this._el.keyBindDiv.style.display = this._el.keyBindDiv.style.display == 'block' ? 'none' : 'block';
+    this.show(!this.isShown());
   }
 
   clearBinding(el: HTMLTableDataCellElement) {
@@ -113,6 +121,10 @@ export class InputDialog {
 
     this.removeListeners();
     this._el.catchDiv.style.display = 'none';
+  }
+
+  private isCatching() {
+    return this._el.catchDiv.style.display == 'block';
   }
 
   private addListeners() {

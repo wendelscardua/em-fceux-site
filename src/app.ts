@@ -50,6 +50,7 @@ export class Elements {
   stack = <HTMLDivElement>document.getElementById('stack');
   stackContainer = <HTMLDivElement>document.getElementById('stackContainer');
   stackToggle = <HTMLInputElement>document.getElementById('stackToggle');
+  helpToggle = <HTMLInputElement>document.getElementById('helpToggle');
 }
 
 export class App {
@@ -69,6 +70,17 @@ export class App {
   private _dragListener = (ev: DragEvent) => {
     ev.stopPropagation();
     ev.preventDefault();
+  };
+  private _keyListener = (ev: KeyboardEvent) => {
+    if (ev.code == 'Escape') {
+      if (this._el.helpToggle.checked || this._inputDialog?.isShown()) {
+        this._el.helpToggle.checked = false;
+        this._inputDialog?.show(false);
+      } else {
+        this.showStack(false);
+        this.showControls(false);
+      }
+    }
   };
   private _contextLostListener = (ev: Event) => {
     // TODO: Handle context loss, see: http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
@@ -92,6 +104,7 @@ export class App {
     this.showStack(true);
     this.initConfig(false);
 
+    document.addEventListener('keydown', this._keyListener);
     document.addEventListener('dragenter', this._dragListener, false);
     document.addEventListener('dragleave', this._dragListener, false);
     document.addEventListener('dragover', this._dragListener, false);
@@ -127,7 +140,7 @@ export class App {
     const updateLoop = () => {
       if (this._initialized) {
         window.requestAnimationFrame(updateLoop);
-        (<Input>this._input).update();
+        this._input?.update();
         this._fceux.update();
       }
     };
@@ -136,8 +149,8 @@ export class App {
 
   dispose() {
     if (this._initialized) {
-      (<InputDialog>this._inputDialog).dispose();
-      (<Input>this._input).dispose();
+      this._inputDialog?.dispose();
+      this._input?.dispose();
       clearInterval(this._saveFilesInterval);
       this._fceux.removeEventListener(this._gameLoadedListener);
       this._initialized = false;
@@ -149,6 +162,7 @@ export class App {
     document.removeEventListener('dragover', this._dragListener, false);
     document.removeEventListener('dragleave', this._dragListener, false);
     document.removeEventListener('dragenter', this._dragListener, false);
+    document.removeEventListener('keydown', this._keyListener);
   }
 
   askSelectGame(ev: MouseEvent, el: HTMLDivElement) {
@@ -176,7 +190,7 @@ export class App {
 
       // Workaround: confirm() stops audio context on Safari 13.1.
       if (this._initialized) {
-        setTimeout(() => (<AudioContext>this._fceux._audioContext).resume());
+        setTimeout(() => this._fceux._audioContext?.resume());
       }
     }
     return false;
@@ -275,7 +289,7 @@ export class App {
       this._gameStack.push({ label, url: filename, offset, deletable });
     };
     for (let filename of builtIns) {
-      pushGame('/games/' + filename, false);
+      pushGame('games/' + filename, false);
     }
     for (let filename in App.storedGames()) {
       pushGame(filename, true);
@@ -384,7 +398,7 @@ export class App {
   }
   toggleInputBindings() {
     if (this._initialized) {
-      (<InputDialog>this._inputDialog).toggleShow();
+      this._inputDialog?.toggleShow();
     }
   }
 
