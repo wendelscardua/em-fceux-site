@@ -21,20 +21,9 @@
 import FCEUX, { FceuxModule } from 'em-fceux';
 import { Input } from './input';
 import { InputDialog } from './input-dialog';
-
-interface StackItem {
-  label: string;
-  url: string;
-  offset: number;
-  deletable: boolean;
-}
-
-interface StoredGames {
-  [filename: string]: Array<number>;
-}
+import { CartStack } from './cart-stack';
 
 export class Elements {
-  cartProto = <HTMLDivElement>document.getElementById('cartProto');
   catchDiv = <HTMLDivElement>document.getElementById('catchDiv');
   catchGamepad = <HTMLSpanElement>document.getElementById('catchGamepad');
   catchKey = <HTMLSpanElement>document.getElementById('catchKey');
@@ -47,9 +36,6 @@ export class Elements {
   soundIcon = <HTMLDivElement>document.getElementById('soundIcon');
   dpadIcon = <HTMLDivElement>document.getElementById('dpadIcon');
   introDiv = <HTMLDivElement>document.getElementById('introDiv');
-  stack = <HTMLDivElement>document.getElementById('stack');
-  stackContainer = <HTMLDivElement>document.getElementById('stackContainer');
-  stackToggle = <HTMLInputElement>document.getElementById('stackToggle');
   helpToggle = <HTMLInputElement>document.getElementById('helpToggle');
 }
 
@@ -62,7 +48,8 @@ export class App {
   private _canvasSelector: string;
   private _canvas: HTMLCanvasElement;
 
-  private _gameStack: StackItem[] = [];
+  private _stack = new CartStack();
+
   private _initialized = false;
 
   private _gameLoadedListener = this.handleGameLoaded.bind(this);
@@ -77,7 +64,7 @@ export class App {
         this._el.helpToggle.checked = false;
         this._inputDialog?.show(false);
       } else {
-        this.showStack(false);
+        this._stack.show(false);
         this.showControls(false);
       }
     }
@@ -99,9 +86,8 @@ export class App {
     this._canvasSelector = canvasSelector;
     this._canvas = <HTMLCanvasElement>document.querySelector(canvasSelector);
 
-    this.updateStack();
-    this.updateStackDom();
-    this.showStack(true);
+    this._stack.update();
+    this._stack.show(true);
     this.initConfig(false);
 
     document.addEventListener('keydown', this._keyListener);
@@ -113,8 +99,10 @@ export class App {
     window.addEventListener('beforeunload', this._beforeUnloadListener);
   }
 
+  // NOTE: Must be called in a user interaction event.
   init() {
-    this._fceux.init(this._canvasSelector);
+    this._fceux.init(this._canvasSelector); // Creates AudioContext.
+
     this._initialized = true;
 
     this.initConfig(false);
@@ -145,6 +133,12 @@ export class App {
       }
     };
     window.requestAnimationFrame(updateLoop);
+
+    // Unhide icons at window top-right.
+    this._el.introDiv.style.display = 'none';
+    this._el.dpadIcon.style.display = 'block';
+    this._el.soundIcon.style.display = 'block';
+    this._el.fullscreenIcon.style.display = 'block';
   }
 
   dispose() {
@@ -165,27 +159,28 @@ export class App {
     document.removeEventListener('keydown', this._keyListener);
   }
 
-  askSelectGame(ev: MouseEvent, el: HTMLDivElement) {
+  onClickCart(ev: MouseEvent, el: HTMLDivElement) {
     ev.stopPropagation();
     ev.preventDefault();
-    let idx = <any>el.dataset.idx * 1;
-    if (idx >= 0 && idx < this._gameStack.length) {
-      this.startGame(this._gameStack[idx].url, this._gameStack[idx].deletable);
+    const index = <any>el.dataset.idx * 1;
+    const cart = this._stack.getCart(index);
+    if (cart) {
+      if (!this._initialized) {
+        this.init();
+      }
+      cart.start(this._fceux);
     }
     return false;
   }
-  askDeleteGame(ev: MouseEvent, el: HTMLDivElement) {
+
+  onClickCartDelete(ev: MouseEvent, el: HTMLDivElement) {
     ev.stopPropagation();
     ev.preventDefault();
-    let idx = <any>el.dataset.idx * 1;
-    if (idx >= 0 && idx < this._gameStack.length) {
-      if (confirm('Are you sure you want to delete ' + this._gameStack[idx].label + '?')) {
-        const storedGames = App.storedGames();
-        delete storedGames[this._gameStack[idx].url];
-        App.setStoredGames(storedGames);
-
-        this.updateStack();
-        this.updateStackDom();
+    const index = <any>el.dataset.idx * 1;
+    const cart = this._stack.getCart(index);
+    if (cart) {
+      if (confirm('Are you sure you want to delete ' + cart._label + '?')) {
+        this._stack.removeCart(index);
       }
 
       // Workaround: confirm() stops audio context on Safari 13.1.
@@ -208,7 +203,7 @@ export class App {
 
       // Hide UI after timeout.
       setTimeout(() => {
-        this.showStack(false);
+        this._stack.show(false);
         this.showControls(false);
       }, 1000);
     }
@@ -225,116 +220,14 @@ export class App {
         if (this._initialized) {
           this._fceux.loadGame(data);
         }
-
-        const storedGames = App.storedGames();
-        storedGames[f.name] = Array.from<number>(data);
-        App.setStoredGames(storedGames);
-
-        this.updateStack();
-        this.updateStackDom();
+        this._stack.addCart(f.name, data);
       };
       r.readAsArrayBuffer(f);
     }
   }
 
-  private showStack(show: boolean) {
-    this._el.stackToggle.checked = show === undefined ? !this._el.stackToggle.checked : show;
-  }
   private showControls(show: boolean) {
     this._el.controllersToggle.checked = show === undefined ? !this._el.controllersToggle.checked : show;
-  }
-
-  private startGame(url: string, isStored: boolean) {
-    if (!this._initialized) {
-      this.init();
-
-      this._el.introDiv.style.display = 'none';
-      this._el.dpadIcon.style.display = 'block';
-      this._el.fullscreenIcon.style.display = 'block';
-      this._el.soundIcon.style.display = 'block';
-    }
-
-    if (!isStored) {
-      this._fceux.downloadGame(url);
-    } else {
-      const storedGames = App.storedGames();
-      this._fceux.loadGame(new Uint8Array(storedGames[url]));
-    }
-  }
-
-  private static splitPath(filename: string) {
-    const splitPathRe = /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
-    const split = splitPathRe.exec(filename);
-    return split ? split.slice(1) : [];
-  }
-  private static pathJoin(...parts: string[]) {
-    const s = Array.prototype.slice.call(parts, 0).join('/');
-    return s.replace(/\/\/+/g, '/');
-  }
-
-  private static storedGames(): { [key: string]: Array<number> } {
-    return localStorage.hasOwnProperty('games') ? JSON.parse(localStorage['games']) : {};
-  }
-  private static setStoredGames(storedGames: StoredGames) {
-    localStorage['games'] = JSON.stringify(storedGames);
-  }
-  private updateStack() {
-    const builtIns = ['Streemerz.nes', '2048.nes', 'Lawn Mower.nes', 'Alter Ego.nes', 'Super Bat Puncher (Demo).nes', 'Lan Master.nes'];
-
-    this._gameStack = [];
-    const pushGame = (filename: string, deletable: boolean) => {
-      const split = App.splitPath(filename);
-      const label = split[2].slice(0, -split[3].length).toUpperCase();
-      const offset = 3 * ((3 * Math.random()) | 0);
-      this._gameStack.push({ label, url: filename, offset, deletable });
-    };
-    for (let filename of builtIns) {
-      pushGame('games/' + filename, false);
-    }
-    for (let filename in App.storedGames()) {
-      pushGame(filename, true);
-    }
-
-    this._gameStack.sort((a, b) => (a.label < b.label ? -1 : a.label > b.label ? 1 : 0));
-  }
-  private updateStackDom() {
-    const stackContainer = this._el.stackContainer;
-    const scrollPos = stackContainer.scrollTop;
-    const list = this._el.stack;
-
-    while (list.firstChild != list.lastChild) {
-      list.removeChild(<Node>list.lastChild);
-    }
-
-    for (let i = 0; i < this._gameStack.length; ++i) {
-      const item = this._gameStack[i];
-      const el = <any>this._el.cartProto.cloneNode(true);
-
-      el.dataset.idx = i;
-      el.style.backgroundPosition = item.offset + 'px 0px';
-      list.appendChild(el);
-
-      const label = el.firstChild.firstChild.firstChild;
-      label.innerHTML = item.label;
-
-      label.style.fontSize = '16px';
-      label.style.lineHeight = '18px';
-
-      let fontSize = 13;
-      while (label.scrollHeight > 18 && fontSize >= 9) {
-        label.style.fontSize = fontSize + 'px';
-        fontSize -= 2;
-      }
-      if (label.scrollHeight > 18) {
-        label.style.lineHeight = '9px';
-      }
-
-      if (!item.deletable) {
-        el.firstChild.lastChild.hidden = true;
-      }
-    }
-
-    stackContainer.scrollTop = scrollPos;
   }
 
   private storeConfig(id: string, v: string | number) {
