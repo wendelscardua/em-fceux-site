@@ -37,6 +37,7 @@ export class Elements {
   dpadIcon = <HTMLDivElement>document.getElementById('dpadIcon');
   introDiv = <HTMLDivElement>document.getElementById('introDiv');
   helpToggle = <HTMLInputElement>document.getElementById('helpToggle');
+  selectFile = <HTMLInputElement>document.getElementById('selectFile');
 }
 
 export class App {
@@ -162,13 +163,19 @@ export class App {
   onClickCart(ev: MouseEvent, el: HTMLDivElement) {
     ev.stopPropagation();
     ev.preventDefault();
+
     const index = <any>el.dataset.idx * 1;
-    const cart = this._stack.getCart(index);
-    if (cart) {
-      if (!this._initialized) {
-        this.init();
+    if (index == 0) {
+      // Add a game from file.
+      this._el.selectFile.click();
+    } else {
+      const cart = this._stack.getCart(index);
+      if (cart) {
+        if (!this._initialized) {
+          this.init();
+        }
+        cart.start(this._fceux);
       }
-      cart.start(this._fceux);
     }
     return false;
   }
@@ -191,6 +198,10 @@ export class App {
     return false;
   }
 
+  handleSelectFile(files: FileList) {
+    this.readFile(files[0]);
+  }
+
   private handleGameLoaded() {
     const md5 = this._fceux.gameMd5();
     if (md5 && localStorage.hasOwnProperty('save-' + md5)) {
@@ -209,10 +220,7 @@ export class App {
     }
   }
 
-  private handleDrop(ev: DragEvent) {
-    ev.stopPropagation();
-    ev.preventDefault();
-    const f = ev.dataTransfer ? ev.dataTransfer.files[0] : null;
+  private readFile(f: File | null) {
     if (f) {
       const r = new FileReader();
       r.onload = () => {
@@ -224,6 +232,12 @@ export class App {
       };
       r.readAsArrayBuffer(f);
     }
+  }
+
+  private handleDrop(ev: DragEvent) {
+    ev.stopPropagation();
+    ev.preventDefault();
+    this.readFile(ev.dataTransfer ? ev.dataTransfer.files[0] : null);
   }
 
   private showControls(show: boolean) {

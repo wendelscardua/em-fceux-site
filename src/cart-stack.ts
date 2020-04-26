@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { Cart, CartType } from "./cart";
+import { Cart } from './cart';
 import * as Games from './games';
 
 function splitPath(filename: string) {
@@ -60,19 +60,21 @@ export class CartStack {
     const builtIns = ['Streemerz.nes', '2048.nes', 'Lawn Mower.nes', 'Alter Ego.nes', 'Super Bat Puncher (Demo).nes', 'Lan Master.nes'];
 
     this._carts.length = 0;
-    const pushGame = (filename: string, type: CartType) => {
+    const pushGame = (filename: string, deletable: boolean) => {
       const split = splitPath(filename);
       const label = split[2].slice(0, -split[3].length).toUpperCase();
-      this._carts.push(new Cart(label, filename, type));
+      this._carts.push(new Cart(label, filename, deletable));
     };
     for (let filename of builtIns) {
-      pushGame('games/' + filename, CartType.BuiltIn);
+      pushGame('games/' + filename, false);
     }
     for (let filename in Games.get()) {
-      pushGame(filename, CartType.User);
+      pushGame(filename, true);
     }
 
     this._carts.sort((a, b) => (a._label < b._label ? -1 : a._label > b._label ? 1 : 0));
+
+    this._carts.unshift(new Cart('', '', false));
 
     this.updateDom();
   }

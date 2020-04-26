@@ -18,32 +18,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { FceuxModule } from "em-fceux";
+import { FceuxModule } from 'em-fceux';
 import * as Games from './games';
-
-export enum CartType {
-  BuiltIn,
-  User,
-}
 
 export class Cart {
   _label: string;
   _url: string;
-  _type: CartType;
+  _deletable: boolean;
 
   private static _proto = <HTMLDivElement>document.getElementById('cartProto');
 
   private _offset: number;
 
-  constructor(label: string, url: string, type: CartType) {
+  constructor(label: string, url: string, deletable: boolean) {
     this._label = label;
     this._url = url;
     this._offset = 3 * ((3 * Math.random()) | 0);
-    this._type = type;
+    this._deletable = deletable;
   }
 
   createDomElement(index: number) {
     const el = <any>Cart._proto.cloneNode(true);
+
+    if (index == 0) {
+      el.classList.add('cartAdd');
+      this._offset = 3;
+    }
 
     el.dataset.idx = index;
     el.style.backgroundPosition = this._offset + 'px 0px';
@@ -63,7 +63,7 @@ export class Cart {
       label.style.lineHeight = '9px';
     }
 
-    if (this._type != CartType.User) {
+    if (!this._deletable) {
       el.firstChild.lastChild.hidden = true;
     }
 
@@ -71,7 +71,7 @@ export class Cart {
   }
 
   start(fceux: FceuxModule) {
-    if (this._type == CartType.BuiltIn) {
+    if (!this._deletable) {
       fceux.downloadGame(this._url);
     } else {
       const games = Games.get();

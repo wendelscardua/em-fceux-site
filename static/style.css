@@ -374,6 +374,9 @@ img.preload {
   vertical-align: bottom;
   background: url('img/cart.gif') no-repeat;
 }
+.cartAdd {
+  background: url('img/cart-add.gif') no-repeat;
+}
 .cart {
   display: table-cell;
   width: 396px;
