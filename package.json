@@ -1,6 +1,6 @@
 {
   "name": "em-fceux-site",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "em-fceux website.",
   "homepage": "https://tsone.kapsi.fi/em-fceux/",
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "clean-webpack-plugin": "^3.0.0",
-    "em-fceux": "^1.0.1",
+    "em-fceux": "^1.0.2",
     "html-webpack-deploy-plugin": "^2.0.6",
     "html-webpack-plugin": "^3.2.0",
     "prettier": "1.19.1",
