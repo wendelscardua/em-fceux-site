@@ -31,7 +31,7 @@
     "build": "npm run prettier && webpack --mode production",
     "clean": "rm -rf dist",
     "dev:setup": "npm link ../em-fceux",
-    "prettier": "prettier --prose-wrap always --write *.md && prettier --single-quote --print-width 999 --trailing-comma es5 --write \"{,!(dist|node_modules)/**/}*.{ts,js,css}\"",
+    "prettier": "prettier --print-width 80 --write *.md && prettier --write \"{,!(dist|node_modules)/**/}*.{ts,js,css}\"",
     "start": "webpack-dev-server"
   },
   "devDependencies": {
