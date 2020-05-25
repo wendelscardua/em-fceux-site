@@ -24,6 +24,7 @@ import { InputDialog } from './input-dialog';
 import { CartStack } from './cart-stack';
 
 export class Elements {
+  menuContainerToggle = <HTMLInputElement>document.getElementById('menuContainerToggle');
   catchDiv = <HTMLDivElement>document.getElementById('catchDiv');
   catchGamepad = <HTMLSpanElement>document.getElementById('catchGamepad');
   catchKey = <HTMLSpanElement>document.getElementById('catchKey');
@@ -67,6 +68,7 @@ export class App {
       } else {
         this._stack.show(false);
         this.showControls(false);
+        this.showMenuContainer(true);
       }
     }
   };
@@ -98,13 +100,27 @@ export class App {
     document.addEventListener('drop', this._dropListener, false);
     this._canvas.addEventListener('webglcontextlost', this._contextLostListener, false);
     window.addEventListener('beforeunload', this._beforeUnloadListener);
+
+    document.body.addEventListener('mousedown', (ev: MouseEvent) => {
+      const hitCanvas = document.elementFromPoint(ev.clientX, ev.clientY) == this._canvas;
+      this.showMenuContainer(!hitCanvas);
+    });
+  }
+
+  private showMenuContainer(show: boolean) {
+    if (this._initialized) {
+      this._el.menuContainerToggle.checked = !show;
+    }
   }
 
   // NOTE: Must be called in a user interaction event.
   init() {
-    this._fceux.init(this._canvasSelector); // Creates AudioContext.
-
+    if (this._initialized) {
+      return;
+    }
     this._initialized = true;
+
+    this._fceux.init(this._canvasSelector); // Creates AudioContext.
 
     this.initConfig(false);
 
@@ -129,7 +145,10 @@ export class App {
     const updateLoop = () => {
       if (this._initialized) {
         window.requestAnimationFrame(updateLoop);
-        this._input?.update();
+
+        const inputBits = this._input!.update();
+        this._fceux.setControllerBits(inputBits);
+
         this._fceux.update();
       }
     };
@@ -144,7 +163,7 @@ export class App {
 
   dispose() {
     if (this._initialized) {
-      this._inputDialog?.dispose();
+      this._inputDialog!.dispose();
       this._input?.dispose();
       clearInterval(this._saveFilesInterval);
       this._fceux.removeEventListener(this._gameLoadedListener);
@@ -216,6 +235,7 @@ export class App {
       setTimeout(() => {
         this._stack.show(false);
         this.showControls(false);
+        this.showMenuContainer(false);
       }, 1000);
     }
   }
@@ -283,6 +303,7 @@ export class App {
         });
       } else {
         document.exitFullscreen();
+        this.showMenuContainer(true);
       }
     } else if ('webkitRequestFullscreen' in this._canvas) {
       // @ts-ignore: For Safari 13.1.
@@ -292,6 +313,7 @@ export class App {
       } else {
         // @ts-ignore: For Safari 13.1.
         document.webkitExitFullscreen();
+        this.showMenuContainer(true);
       }
     } else {
       console.warn('Fullscreen API unavailable.');
@@ -305,7 +327,7 @@ export class App {
   }
   toggleInputBindings() {
     if (this._initialized) {
-      this._inputDialog?.toggleShow();
+      this._inputDialog!.toggleShow();
     }
   }
 

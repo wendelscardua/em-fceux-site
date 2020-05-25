@@ -89,7 +89,7 @@ export class Input {
     }
 
     this.updateSystem();
-    this.updateControllers();
+    return this.updateControllers();
   }
 
   setInput(id: string, keys: string[], gamepad: number) {
@@ -223,8 +223,7 @@ export class Input {
 
   private updateControllers() {
     // TODO: handle all active controllers
-    let controllerBits = this.bitsForController('1');
-    this._fceux.setControllerBits(controllerBits);
+    return this.bitsForController('1');
   }
 
   private bitsForController(index: '1' | '2' | '3' | '4') {
@@ -276,6 +275,5 @@ export class Input {
   private handleMouse(ev: MouseEvent) {
     const rect = this._canvas.getBoundingClientRect();
     this._fceux.triggerZapper(ev.clientX - rect.left, ev.clientY - rect.top);
-    ev.preventDefault();
   }
 }

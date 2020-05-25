@@ -132,18 +132,31 @@ img.preload {
   text-align: center;
 }
 
-#helpIcon,
+#menuContainer {
+  visibility: visible;
+  opacity: 1;
+  transition: 200ms;
+}
+#menuContainerToggle:checked ~ #menuContainer {
+  visibility: hidden;
+  opacity: 0;
+  transition: 400ms;
+}
+#playContainer {
+  visibility: hidden;
+  opacity: 0;
+  transition: 400ms;
+}
+#menuContainerToggle:checked ~ #playContainer {
+  visibility: visible;
+  opacity: 1;
+  transition: 200ms;
+}
+
 #controllersToggleLabel,
 #stackToggleLabel,
 .cart {
   cursor: pointer;
-}
-
-#fullscreenIcon,
-#soundIcon,
-#dpadIcon {
-  cursor: pointer;
-  display: none;
 }
 
 #controllersTab {
@@ -385,19 +398,29 @@ img.preload {
 
 .icon {
   position: fixed;
+  cursor: pointer;
   top: 0;
   width: 48px;
   height: 48px;
 }
+#burgerIcon {
+  left: 0px;
+  background: url('img/sheet.gif') 0 -114px;
+  width: 30px;
+  height: 27px;
+}
 #fullscreenIcon {
+  display: none;
   right: 153px;
   background: url('img/sheet.gif') -32px 0;
 }
 #soundIcon {
+  display: none;
   right: 105px;
   background: url('img/sheet.gif') -32px -48px;
 }
 #dpadIcon {
+  display: none;
   right: 54px;
   background: url('img/sheet.gif') -80px 0;
 }
