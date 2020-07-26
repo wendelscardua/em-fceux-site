@@ -112,6 +112,7 @@ export class App {
     if (anchor) {
       const cart = this._stack.getCartByLabel(anchor);
       if (cart) {
+        this._stack.show(false);
         if (!this._initialized) {
           this.init();
         }
