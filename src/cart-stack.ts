@@ -48,7 +48,7 @@ export class CartStack {
 
   getCartByLabel(label: string) {
     var canonLabel = label.toUpperCase();
-    return this._carts.find((cart) => (cart._label === canonLabel));
+    return this._carts.find(cart => cart._label === canonLabel);
   }
 
   addCart(url: string, data: Uint8Array) {

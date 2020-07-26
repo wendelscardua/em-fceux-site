@@ -108,7 +108,7 @@ export class App {
     });
 
     var currentUrl = document.URL;
-    var anchor = currentUrl.split('#')[1]
+    var anchor = currentUrl.split('#')[1];
     if (anchor) {
       const cart = this._stack.getCartByLabel(anchor);
       if (cart) {
