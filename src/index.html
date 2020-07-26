@@ -59,163 +59,171 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   PLEASE ENABLE JAVASCRIPT em-fceux requires JavaScript
 </noscript>
 
-<div id="introDiv">
-  <div id="intro">
-    <h1>EM-FCEUX</h1>
-    <p>A web NES emulator.
-    <br/>
-    <h3>Choose a game<img width="20" height="20" src="img/right.gif" alt="arrow pointing right" style="margin-bottom: -4px" /></h3>
-    <h3><img width="20" height="20" src="img/right.gif" alt="arrow pointing left" style="margin-bottom: -4px; transform: rotate(180deg)" />Reveal settings</h3>
-  </div>
+<input id="menuContainerToggle" type="checkbox" hidden />
+<div id="playContainer">
+  <div class="icon" id="burgerIcon" onclick="app.showMenuContainer(true)"></div>
 </div>
+<div id="menuContainer">
+  <label id="menuContainerToggleLabel" for="menuContainerToggle"></label>
 
-<input id="controllersToggle" type="checkbox" hidden />
-<div id="controllersTab">
-  <div id="controllersContainer">
-    <table id="controllers">
-
-      <tr><td colspan="2"><h4>PICTURE CONTROLS</h4>
-      <tr><td>Brightness<td><input id="video-brightness" type="range" min="-1" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
-      <tr><td>Contrast<td><input id="video-contrast" type="range" min="-1" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
-      <tr><td>Color<td><input id="video-color" type="range" min="-1" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
-      <tr><td>Gamma<td><input id="video-gamma" type="range" min="-1" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
-
-      <tr><td colspan="2"><h4>NTSC EMULATION</h4>
-      <tr><td>NTSC Emulation*<td><input id="video-ntsc" type="checkbox" checked oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><label for="video-ntsc"></label>
-      <tr><td>Sharpness<td><input id="video-sharpness" type="range" min="-0.5" max="0.5" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
-      <tr><td>Signal Noise<td><input id="video-noise" type="range" min="0" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><br/>
-
-      <tr><td colspan="2"><h4>TV EMULATION</h4>
-      <tr><td>TV Emulation<td><input id="video-tv" type="checkbox" checked oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><label for="video-tv"></label><br/>
-      <tr><td>Scanlines<td><input id="video-scanlines" type="range" min="0" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><br/>
-      <tr><td>Glow<td><input id="video-glow" type="range" min="0" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><br/>
-      <tr><td>Convergence<td><input id="video-convergence" type="range" min="0" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><br/>
-
-      <tr><td colspan="2"><h4>SYSTEM SETTINGS</h4>
-      <tr><td>Port 1<td><select disabled><option>Controller</option></select>
-      <tr><td>Port 2<td><select id="system-port-2" onchange="app.setConfig(this)"><option value="controller">Controller</option><option value="zapper">Zapper</option></select>
-      <tr><td>Video System<td><select id="video-system" onchange="app.setConfig(this)"><option value="auto">(Auto)</option><option value="ntsc">NTSC</option><option value="pal">PAL</option></select>
-    </table>
-    <p><input type="button" value="Reset to Defaults" onclick="app.initConfig(true)" />
-    <p><i><small>* NTSC composite video.</small></i>
-    <!-- <input type="button" value="Dump FS" onclick="function dump(f) { console.log('!!! ' + f); app.findFiles(f).forEach(dump); }; dump('/');" /> -->
+  <div id="introDiv">
+    <div id="intro">
+      <h1>EM-FCEUX</h1>
+      <p>A web NES emulator.
+      <br/>
+      <h3>Choose a game<img width="20" height="20" src="img/right.gif" alt="arrow pointing right" style="margin-bottom: -4px" /></h3>
+      <h3><img width="20" height="20" src="img/right.gif" alt="arrow pointing left" style="margin-bottom: -4px; transform: rotate(180deg)" />Reveal settings</h3>
+    </div>
   </div>
-  <label id="controllersToggleLabel" for="controllersToggle"></label>
-</div>
 
-<div hidden>
-  <div class="cartRow" id="cartProto" data-idx=""><div class="cart" onclick="return app.onClickCart(event, this.parentNode)"><div class="labelContainer"><div class="label"></div></div><div class="cartDelete" onclick="return app.onClickCartDelete(event, this.parentNode.parentNode);"></div></div></div>
-  <input id="selectFile" type="file" onchange="app.handleSelectFile(this.files); this.value = ''">
-</div>
-<input id="stackToggle" type="checkbox" hidden />
-<div id="stackTab">
-  <label id="stackToggleLabel" for="stackToggle"></label>
-  <div id="stackContainer"><div id="stack"><div></div></div></div>
-</div>
+  <input id="controllersToggle" type="checkbox" hidden />
+  <div id="controllersTab">
+    <div id="controllersContainer">
+      <table id="controllers">
 
-<input id="helpToggle" type="checkbox" hidden />
-<div class="icon" id="fullscreenIcon" onclick="app.toggleFullscreen()"></div>
-<div class="icon" id="soundIcon" onclick="app.toggleMuted()"></div>
-<label class="icon" id="helpIcon" for="helpToggle"></label>
+        <tr><td colspan="2"><h4>PICTURE CONTROLS</h4>
+        <tr><td>Brightness<td><input id="video-brightness" type="range" min="-1" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
+        <tr><td>Contrast<td><input id="video-contrast" type="range" min="-1" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
+        <tr><td>Color<td><input id="video-color" type="range" min="-1" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
+        <tr><td>Gamma<td><input id="video-gamma" type="range" min="-1" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
 
-<div id="keyBindDiv">
-  <div class="dimmer"></div>
-  <div class="scrollingContainer">
-  <div class="scrollingContent">
-    <img id="dpadIndicator" width="48" height="48" src="img/indicator.gif" alt="flashing indicator" />
+        <tr><td colspan="2"><h4>NTSC EMULATION</h4>
+        <tr><td>NTSC Emulation*<td><input id="video-ntsc" type="checkbox" checked oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><label for="video-ntsc"></label>
+        <tr><td>Sharpness<td><input id="video-sharpness" type="range" min="-0.5" max="0.5" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/>
+        <tr><td>Signal Noise<td><input id="video-noise" type="range" min="0" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><br/>
 
-    <h3>INPUT BINDINGS</h3>
-    <table hidden>
-      <tr id="keyBindProto"><td><td><td><td data-id="" data-name=""><input type="button" value="Set" onclick="app._inputDialog.catchStart(this.parentNode);" /> <input type="button" value="Clear" onclick="app._inputDialog.clearBinding(this.parentNode);" />
-    </table>
+        <tr><td colspan="2"><h4>TV EMULATION</h4>
+        <tr><td>TV Emulation<td><input id="video-tv" type="checkbox" checked oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><label for="video-tv"></label><br/>
+        <tr><td>Scanlines<td><input id="video-scanlines" type="range" min="0" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><br/>
+        <tr><td>Glow<td><input id="video-glow" type="range" min="0" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><br/>
+        <tr><td>Convergence<td><input id="video-convergence" type="range" min="0" max="1" step="0.1" oninput="app.setConfig(this)" onchange="app.setConfig(this)"/><br/>
 
-    <p>Click 'Set' button to change bindings for an input. Click 'Clear' to remove the binding.
-    <p><table id="keyBindTable"><tr><td><b>Input</b><td><b>Keyboard</b><td><b>Gamepad</b><td><b>Options</b></table>
-    <br/>
-    <input type="button" value="Reset to Defaults" onclick="app._inputDialog.resetToDefaults();" />
-    <br/><br/>
+        <tr><td colspan="2"><h4>SYSTEM SETTINGS</h4>
+        <tr><td>Port 1<td><select disabled><option>Controller</option></select>
+        <tr><td>Port 2<td><select id="system-port-2" onchange="app.setConfig(this)"><option value="controller">Controller</option><option value="zapper">Zapper</option></select>
+        <tr><td>Video System<td><select id="video-system" onchange="app.setConfig(this)"><option value="auto">(Auto)</option><option value="ntsc">NTSC</option><option value="pal">PAL</option></select>
+      </table>
+      <p><input type="button" value="Reset to Defaults" onclick="app.initConfig(true)" />
+      <p><i><small>* NTSC composite video.</small></i>
+      <!-- <input type="button" value="Dump FS" onclick="function dump(f) { console.log('!!! ' + f); app.findFiles(f).forEach(dump); }; dump('/');" /> -->
+    </div>
+    <label id="controllersToggleLabel" for="controllersToggle"></label>
   </div>
+
+  <div hidden>
+    <div class="cartRow" id="cartProto" data-idx=""><div class="cart" onclick="return app.onClickCart(event, this.parentNode)"><div class="labelContainer"><div class="label"></div></div><div class="cartDelete" onclick="return app.onClickCartDelete(event, this.parentNode.parentNode);"></div></div></div>
+    <input id="selectFile" type="file" onchange="app.handleSelectFile(this.files); this.value = ''">
   </div>
-</div>
-<div class="icon" id="dpadIcon" onclick="app.toggleInputBindings()"></div>
-
-<div id="catchDiv">
-  <div class="dimmer"></div>
-  <div id="catch">
-    <h1>PRESS A KEY OR GAMEPAD BUTTON</h1>
-    <p><span id="catchKey"></span> and <span id="catchGamepad"></span> will be bound to <span id="catchName"></span>.
-    <p>
-    <input type="button" value="Cancel" onclick="app._inputDialog.catchEnd(false);" />
-    <input type="button" value="OK" onclick="app._inputDialog.catchEnd(true);" />
+  <input id="stackToggle" type="checkbox" hidden />
+  <div id="stackTab">
+    <label id="stackToggleLabel" for="stackToggle"></label>
+    <div id="stackContainer"><div id="stack"><div></div></div></div>
   </div>
-</div>
 
-<div id="helpDiv">
-  <div class="dimmer"></div>
-  <div class="scrollingContainer">
-  <div class="scrollingContent">
-    <img id="helpIndicator" width="48" height="48" src="img/indicator.gif" alt="flashing indicator" />
+  <input id="helpToggle" type="checkbox" hidden />
+  <div class="icon" id="fullscreenIcon" onclick="app.toggleFullscreen()"></div>
+  <div class="icon" id="soundIcon" onclick="app.toggleMuted()"></div>
+  <label class="icon" id="helpIcon" for="helpToggle"></label>
 
-    <h2>EM-FCEUX</h2>
-    <p>em-fceux is a web port of the <a href="http://www.fceux.com/">FCEUX</a> NES emulator.
+  <div id="keyBindDiv">
+    <div class="dimmer"></div>
+    <div class="scrollingContainer">
+    <div class="scrollingContent">
+      <img id="dpadIndicator" width="48" height="48" src="img/indicator.gif" alt="flashing indicator" />
 
-    <h3>INSTRUCTIONS</h3>
-    <p>To play a game, select it game from the stack on the right.
-    Add more games by dropping them on the window (formats: NES, ZIP, NSF).
-    Remove a games by clicking <img src="img/x.gif" width=19 height=19 alt="X icon"/>.
+      <h3>INPUT BINDINGS</h3>
+      <table hidden>
+        <tr id="keyBindProto"><td><td><td><td data-id="" data-name=""><input type="button" value="Set" onclick="app._inputDialog.catchStart(this.parentNode);" /> <input type="button" value="Clear" onclick="app._inputDialog.clearBinding(this.parentNode);" />
+      </table>
 
-    <h3>INPUTS</h3>
-    <p>Inputs can be customized by clicking <img src="img/dpad_sm.gif" width=20 height=20 alt="key bindings icon" /> on the top menu.
-    Defaults:
-    <table>
-      <tr><td><b>Input</b><td><b>Key</b>
-      <tr><td>Directional Pad (Controller 1)<td>Arrow Keys
-      <tr><td>A Button (Controller 1)<td>F
-      <tr><td>B Button (Controller 1)<td>D
-      <tr><td>Select (Controller 1)<td>S
-      <tr><td>Start (Controller 1)<td>Enter
-      <tr><td>Reset System<td>Ctrl+R
-      <tr><td>Speed Throttle<td>Tab
-      <tr><td>Select Save State<td>0-9
-      <tr><td>Save Save State<td>F5
-      <tr><td>Load Save State<td>F7
-      <tr><td>Pause Emulation<td>P
-      <tr><td>Single Frame Step<td>\ (Backslash)
-      <tr><td>Exit Fullscreen Mode<td>Esc
-    </table>
-    <p>Use mouse to trigger Zapper.
-
-    <h3>SETTINGS</h3>
-    <p>Reveal settings by clicking the pixelated triangle on the left.
-    There are video and system settings, for example brightness, sharpness, color,
-    NTSC signal emulation and PAL and NTSC system modes.
-
-    <h3>TROUBLESHOOTING</h3>
-    <p>Low frame rate: Disable CRT TV emulation in settings. Also try fullscreen mode.
-    <p>Game plays too fast/slow: Try changing to PAL or NTSC mode in the settings.
-    <p>Other issues: Try with another browser, and if the issue persists,
-    <a href="https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open">report</a> a bug.
-    Tested to work on latest versions of Firefox, Chrome/Chromium and Safari (March 2020).
-    <p>Can't play on iPhone/Android: Touch input is not supported yet. Maybe you can
-    <a href="https://bitbucket.org/tsone/em-fceux/issues/10/support-for-touchscreen-devices">help</a>?
-
-    <h3>CONTACT AND CONTRIBUTING</h3>
-    <p>Report bugs and feature requests in the
-    <a href="https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open">issue tracker</a>.
-    <p>Contributions are welcome! The projects are:
-    <a href="https://bitbucket.org/tsone/em-fceux/">em-fceux</a> (FCEUX port, "emulation core")
-    and <a href="https://bitbucket.org/tsone/em-fceux-site/">em-fceux-site</a> (this site).
-
-    <h3>OTHER INFORMATION</h3>
-    <p>Licensed under <a href="gpl-2.0.txt">GNU GPL 2</a> excluding the built-in games.
-    The games are distributed by permission from the authors.
-    <p>The games and save data is stored locally <i>in your browser only</i>.
-    The site has no tracking, analytics or cookies.
-    <p>Powered by <a href="http://emscripten.org/">Emscripten</a>.
-    <p>Version: 1.0.2
-    <br/><br/>
+      <p>Click 'Set' button to change bindings for an input. Click 'Clear' to remove the binding.
+      <p><table id="keyBindTable"><tr><td><b>Input</b><td><b>Keyboard</b><td><b>Gamepad</b><td><b>Options</b></table>
+      <br/>
+      <input type="button" value="Reset to Defaults" onclick="app._inputDialog.resetToDefaults();" />
+      <br/><br/>
+    </div>
+    </div>
   </div>
+  <div class="icon" id="dpadIcon" onclick="app.toggleInputBindings()"></div>
+
+  <div id="catchDiv">
+    <div class="dimmer"></div>
+    <div id="catch">
+      <h1>PRESS A KEY OR GAMEPAD BUTTON</h1>
+      <p><span id="catchKey"></span> and <span id="catchGamepad"></span> will be bound to <span id="catchName"></span>.
+      <p>
+      <input type="button" value="Cancel" onclick="app._inputDialog.catchEnd(false);" />
+      <input type="button" value="OK" onclick="app._inputDialog.catchEnd(true);" />
+    </div>
   </div>
+
+  <div id="helpDiv">
+    <div class="dimmer"></div>
+    <div class="scrollingContainer">
+    <div class="scrollingContent">
+      <img id="helpIndicator" width="48" height="48" src="img/indicator.gif" alt="flashing indicator" />
+
+      <h2>EM-FCEUX</h2>
+      <p>em-fceux is a web port of the <a href="http://www.fceux.com/">FCEUX</a> NES emulator.
+
+      <h3>INSTRUCTIONS</h3>
+      <p>To play a game, select it game from the stack on the right.
+      Add more games by dropping them on the window (formats: NES, ZIP, NSF).
+      Remove a games by clicking <img src="img/x.gif" width=19 height=19 alt="X icon"/>.
+
+      <h3>INPUTS</h3>
+      <p>Inputs can be customized by clicking <img src="img/dpad_sm.gif" width=20 height=20 alt="key bindings icon" /> on the top menu.
+      Defaults:
+      <table>
+        <tr><td><b>Input</b><td><b>Key</b>
+        <tr><td>Directional Pad (Controller 1)<td>Arrow Keys
+        <tr><td>A Button (Controller 1)<td>F
+        <tr><td>B Button (Controller 1)<td>D
+        <tr><td>Select (Controller 1)<td>S
+        <tr><td>Start (Controller 1)<td>Enter
+        <tr><td>Reset System<td>Ctrl+R
+        <tr><td>Speed Throttle<td>Tab
+        <tr><td>Select Save State<td>0-9
+        <tr><td>Save Save State<td>F5
+        <tr><td>Load Save State<td>F7
+        <tr><td>Pause Emulation<td>P
+        <tr><td>Single Frame Step<td>\ (Backslash)
+        <tr><td>Exit Fullscreen Mode<td>Esc
+      </table>
+      <p>Use mouse to trigger Zapper.
+
+      <h3>SETTINGS</h3>
+      <p>Reveal settings by clicking the pixelated triangle on the left.
+      There are video and system settings, for example brightness, sharpness, color,
+      NTSC signal emulation and PAL and NTSC system modes.
+
+      <h3>TROUBLESHOOTING</h3>
+      <p>Low frame rate: Disable CRT TV emulation in settings. Also try fullscreen mode.
+      <p>Game plays too fast/slow: Try changing to PAL or NTSC mode in the settings.
+      <p>Other issues: Try with another browser, and if the issue persists,
+      <a href="https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open">report</a> a bug.
+      Tested to work on latest versions of Firefox, Chrome/Chromium and Safari (March 2020).
+      <p>Can't play on iPhone/Android: Touch input is not supported yet. Maybe you can
+      <a href="https://bitbucket.org/tsone/em-fceux/issues/10/support-for-touchscreen-devices">help</a>?
+
+      <h3>CONTACT AND CONTRIBUTING</h3>
+      <p>Report bugs and feature requests in the
+      <a href="https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open">issue tracker</a>.
+      <p>Contributions are welcome! The projects are:
+      <a href="https://bitbucket.org/tsone/em-fceux/">em-fceux</a> (FCEUX port, "emulation core")
+      and <a href="https://bitbucket.org/tsone/em-fceux-site/">em-fceux-site</a> (this site).
+
+      <h3>OTHER INFORMATION</h3>
+      <p>Licensed under <a href="gpl-2.0.txt">GNU GPL 2</a> excluding the built-in games.
+      The games are distributed by permission from the authors.
+      <p>The games and save data is stored locally <i>in your browser only</i>.
+      The site has no tracking, analytics or cookies.
+      <p>Powered by <a href="http://emscripten.org/">Emscripten</a>.
+      <p>Version: 1.0.3
+      <br/><br/>
+    </div>
+  </div>
+
 </div>
 
 </body>
