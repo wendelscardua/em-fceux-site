@@ -57,7 +57,7 @@ export class CartStack {
   }
 
   update() {
-    const builtIns = ['Streemerz.nes', '2048.nes', 'Lawn Mower.nes', 'Alter Ego.nes', 'Super Bat Puncher (Demo).nes', 'Lan Master.nes'];
+    const builtIns = ['controll.nes', 'raddio.nes', 'retropia.nes', 'retropia-ptbr.nes'];
 
     this._carts.length = 0;
     const pushGame = (filename: string, deletable: boolean) => {
