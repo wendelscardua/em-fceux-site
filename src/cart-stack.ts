@@ -46,6 +46,11 @@ export class CartStack {
     return this._carts[index];
   }
 
+  getCartByLabel(label: string) {
+    var canonLabel = label.toUpperCase();
+    return this._carts.find((cart) => (cart._label === canonLabel));
+  }
+
   addCart(url: string, data: Uint8Array) {
     Games.add(url, data);
     this.update();
