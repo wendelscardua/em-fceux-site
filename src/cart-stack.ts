@@ -77,8 +77,6 @@ export class CartStack {
       pushGame(filename, true);
     }
 
-    this._carts.sort((a, b) => (a._label < b._label ? -1 : a._label > b._label ? 1 : 0));
-
     this._carts.unshift(new Cart('', '', false));
 
     this.updateDom();
