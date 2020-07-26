@@ -62,7 +62,7 @@ export class CartStack {
   }
 
   update() {
-    const builtIns = ['controll.nes', 'raddio.nes', 'retropia.nes', 'retropia-ptbr.nes'];
+    const builtIns = ['raddio.nes', 'controll.nes', 'retropia.nes', 'retropia-ptbr.nes', 'blobland.nes', 'lowas.nes', 'happy.nes', 'macaco.nes'];
 
     this._carts.length = 0;
     const pushGame = (filename: string, deletable: boolean) => {
