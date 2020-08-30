@@ -62,7 +62,7 @@ export class CartStack {
   }
 
   update() {
-    const builtIns = ['RGB.nes', 'bare-metal-2.0.nes', 'gift.nes', 'roguelore.nes', 'ouroboros.nes', 'planter.nes', 'bare-metal-e.nes', 'bare-metal-br.nes', 'raddio.nes', 'controll.nes', 'retropia.nes', 'retropia-ptbr.nes', 'blobland.nes', 'lowas.nes', 'happy.nes', 'trans-flag.nes'];
+    const builtIns = ['retropia.nes'];
 
     this._carts.length = 0;
     const pushGame = (filename: string, deletable: boolean) => {

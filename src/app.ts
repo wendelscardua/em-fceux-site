@@ -91,7 +91,7 @@ export class App {
     this._canvas = <HTMLCanvasElement>document.querySelector(canvasSelector);
 
     this._stack.update();
-    this._stack.show(true);
+    this._stack.show(false);
     this.initConfig(false);
 
     document.addEventListener('keydown', this._keyListener);
@@ -107,18 +107,11 @@ export class App {
       this.showMenuContainer(!hitCanvas);
     });
 
-    var currentUrl = document.URL;
-    var anchor = currentUrl.split('#')[1];
-    if (anchor) {
-      const cart = this._stack.getCartByLabel(anchor);
-      if (cart) {
-        this._stack.show(false);
-        if (!this._initialized) {
-          this.init();
-        }
-        (<Cart>cart).start(this._fceux);
-      }
+    const cart = this._stack.getCart(1);
+    if (!this._initialized) {
+      this.init();
     }
+    (<Cart>cart).start(this._fceux);
   }
 
   private showMenuContainer(show: boolean) {
