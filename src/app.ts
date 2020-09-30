@@ -299,6 +299,7 @@ export class App {
     }
   }
   initConfig(reset: boolean) {
+    this._fceux._defaultConfig['system-port-2'] = 'controller';
     for (let id in this._fceux._defaultConfig) {
       let v = this._fceux._defaultConfig[id];
       if (!reset && localStorage.hasOwnProperty(id)) {
