@@ -46,6 +46,11 @@ export class CartStack {
     return this._carts[index];
   }
 
+  getCartByLabel(label: string) {
+    var canonLabel = label.toUpperCase();
+    return this._carts.find(cart => cart._label === canonLabel);
+  }
+
   addCart(url: string, data: Uint8Array) {
     Games.add(url, data);
     this.update();
@@ -57,7 +62,7 @@ export class CartStack {
   }
 
   update() {
-    const builtIns = ['Streemerz.nes', '2048.nes', 'Lawn Mower.nes', 'Alter Ego.nes', 'Super Bat Puncher (Demo).nes', 'Lan Master.nes'];
+    const builtIns = ['bare-metal-e.nes', 'bare-metal-br.nes', 'raddio.nes', 'controll.nes', 'retropia.nes', 'retropia-ptbr.nes', 'blobland.nes', 'lowas.nes', 'happy.nes', 'macaco.nes'];
 
     this._carts.length = 0;
     const pushGame = (filename: string, deletable: boolean) => {
@@ -71,8 +76,6 @@ export class CartStack {
     for (let filename in Games.get()) {
       pushGame(filename, true);
     }
-
-    this._carts.sort((a, b) => (a._label < b._label ? -1 : a._label > b._label ? 1 : 0));
 
     this._carts.unshift(new Cart('', '', false));
 

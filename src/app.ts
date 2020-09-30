@@ -22,6 +22,7 @@ import FCEUX, { FceuxModule } from 'em-fceux';
 import { Input } from './input';
 import { InputDialog } from './input-dialog';
 import { CartStack } from './cart-stack';
+import { Cart } from './cart';
 
 export class Elements {
   menuContainerToggle = <HTMLInputElement>document.getElementById('menuContainerToggle');
@@ -105,6 +106,19 @@ export class App {
       const hitCanvas = document.elementFromPoint(ev.clientX, ev.clientY) == this._canvas;
       this.showMenuContainer(!hitCanvas);
     });
+
+    var currentUrl = document.URL;
+    var anchor = currentUrl.split('#')[1];
+    if (anchor) {
+      const cart = this._stack.getCartByLabel(anchor);
+      if (cart) {
+        this._stack.show(false);
+        if (!this._initialized) {
+          this.init();
+        }
+        (<Cart>cart).start(this._fceux);
+      }
+    }
   }
 
   private showMenuContainer(show: boolean) {
