@@ -62,7 +62,7 @@ export class CartStack {
   }
 
   update() {
-    const builtIns = ['bare-metal-e.nes', 'bare-metal-br.nes', 'raddio.nes', 'controll.nes', 'retropia.nes', 'retropia-ptbr.nes', 'blobland.nes', 'lowas.nes', 'happy.nes', 'macaco.nes'];
+    const builtIns = ['planter.nes', 'bare-metal-e.nes', 'bare-metal-br.nes', 'raddio.nes', 'controll.nes', 'retropia.nes', 'retropia-ptbr.nes', 'blobland.nes', 'lowas.nes', 'happy.nes', 'macaco.nes'];
 
     this._carts.length = 0;
     const pushGame = (filename: string, deletable: boolean) => {
