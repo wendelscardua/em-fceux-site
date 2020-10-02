@@ -62,7 +62,7 @@ export class CartStack {
   }
 
   update() {
-    const builtIns = ['retropia.nes'];
+    const builtIns = ['gift.nes'];
 
     this._carts.length = 0;
     const pushGame = (filename: string, deletable: boolean) => {
