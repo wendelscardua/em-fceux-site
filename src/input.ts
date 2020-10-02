@@ -223,7 +223,7 @@ export class Input {
 
   private updateControllers() {
     // TODO: handle all active controllers
-    return this.bitsForController('2') << 8 | this.bitsForController('1');
+    return (this.bitsForController('2') << 8) | this.bitsForController('1');
   }
 
   private bitsForController(index: '1' | '2' | '3' | '4') {
